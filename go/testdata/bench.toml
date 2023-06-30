@@ -1,0 +1,17 @@
+strict_dsl = true
+
+[[graph]]
+name = "bench"
+[[graph.vertex]]
+processor = "bench0"
+[[graph.vertex]]
+processor = "bench1"
+[[graph.vertex]]
+processor = "bench2"
+[[graph.vertex]]
+processor = "bench3"
+[[graph.vertex]]
+processor = "bench4"
+[[graph.vertex]]
+processor = "bench5"
+

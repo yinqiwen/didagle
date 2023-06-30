@@ -1,0 +1,139 @@
+[[graph]]
+name = "main"
+[[graph.vertex]]
+id = "0"
+start = true
+successor = [ "1", "2", "5", "6",]
+processor = "op0"
+
+[graph.vertex.args]
+testStrArg = "hello,world"
+[[graph.vertex]]
+id = "1"
+successor = [ "4",]
+processor = "noop"
+
+[[graph.vertex]]
+id = "2"
+successor = [ "4",]
+processor = "noop"
+
+[[graph.vertex]]
+id = "3"
+successor = [ "4",]
+
+[[graph.vertex]]
+id = "4"
+if = [ "5",]
+else = [ "6",]
+processor = "ispine_didagle_expr"
+cond = "ARGS.flag==1"
+
+[[graph.vertex]]
+id = "5"
+successor = [ "7",]
+processor = "op1"
+
+[[graph.vertex]]
+id = "6"
+successor = [ "7",]
+processor = "op2"
+
+[[graph.vertex]]
+id = "7"
+successor = [ "8",]
+processor = "op3"
+
+[[graph.vertex]]
+id = "8"
+successor = [ "10",]
+while = "ARGS.loopIdx<10"
+graph = "while_0"
+
+[[graph.vertex]]
+id = "10"
+successor = [ "19",]
+while = "ARGS.loopIdx<2"
+graph = "while_1"
+
+[[graph.vertex]]
+id = "19"
+successor = [ "20",]
+graph = "test_g"
+
+[[graph.vertex]]
+id = "20"
+graph = "test_g"
+
+
+[[graph]]
+name = "while_0"
+[[graph.vertex]]
+id = "9"
+start = true
+processor = "op4"
+[[graph.vertex.input]]
+field = "op3Result"
+extern = true
+
+
+
+[[graph]]
+name = "while_1"
+[[graph.vertex]]
+id = "11"
+start = true
+processor = "op4"
+[[graph.vertex.input]]
+field = "op3Result"
+extern = true
+
+
+
+[[graph]]
+name = "test1.test_g2"
+[[graph.vertex]]
+id = "14"
+successor = [ "15",]
+processor = "noop"
+
+[[graph.vertex]]
+id = "15"
+processor = "noop"
+
+
+[[graph]]
+name = "while_2"
+[[graph.vertex]]
+id = "18"
+start = true
+processor = "op4"
+[[graph.vertex.input]]
+field = "op3Result"
+extern = true
+
+
+
+[[graph]]
+name = "test_g"
+[[graph.vertex]]
+id = "12"
+successor = [ "13",]
+processor = "noop"
+
+[[graph.vertex]]
+id = "13"
+successor = [ "16",]
+processor = "noop"
+
+[[graph.vertex]]
+id = "16"
+successor = [ "17",]
+graph = "test1.test_g2"
+
+[[graph.vertex]]
+id = "17"
+while = "ARGS.loopIdx<3"
+graph = "while_2"
+
+

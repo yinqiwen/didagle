@@ -1,0 +1,64 @@
+[[graph]]
+name = "main"
+[[graph.vertex]]
+processor = "op0"
+id = "0"
+successor = [ "1", "2", "5", "6",]
+start = true
+
+[graph.vertex.args]
+testStrArg = "hello,world"
+[[graph.vertex]]
+processor = "noop"
+id = "1"
+successor = [ "4",]
+
+[[graph.vertex]]
+processor = "noop"
+id = "2"
+successor = [ "4",]
+
+[[graph.vertex]]
+processor = "ispine_didagle_expr"
+id = "4"
+if = [ "5",]
+else = [ "6",]
+cond = "ARGS.flag==1"
+
+[[graph.vertex]]
+processor = "op1"
+id = "5"
+successor = [ "7",]
+
+[[graph.vertex]]
+processor = "op2"
+id = "6"
+successor = [ "7",]
+
+[[graph.vertex]]
+processor = "op3"
+id = "7"
+successor = [ "8",]
+
+[[graph.vertex]]
+id = "8"
+while = "ARGS.loopIdx<10"
+graph = "gengraph_0"
+
+
+[[graph]]
+name = "gengraph_0"
+[[graph.vertex]]
+processor = "op4"
+id = "9"
+start = true
+[[graph.vertex.input]]
+field = "jsonOut"
+extern = true
+
+[[graph.vertex.input]]
+field = "op3Result"
+extern = true
+
+
+

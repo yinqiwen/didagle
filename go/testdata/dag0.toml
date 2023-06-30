@@ -1,0 +1,46 @@
+strict_dsl = true
+
+[[graph]]
+name = "graph0"
+[[graph.vertex]]
+processor = "phase000"
+[[graph.vertex]]
+processor = "phase001"
+
+[[graph]]
+name = "graph1"
+[[graph.vertex]]
+processor = "phase010"
+successor = ["phase011"]
+[[graph.vertex]]
+processor = "phase011"
+
+[[graph]]
+name = "graph2"
+[[graph.vertex]]
+processor = "phase010"
+[[graph.vertex]]
+processor = "phase011"
+deps = ["phase010"]
+
+[[graph]]
+name = "graph3"
+[[graph.vertex]]
+processor = "phase010"
+successor = [ "if", "phase011", "phase012"]
+start = true
+[[graph.vertex]]
+id = "if"
+cond = "ARGS.errFlag"
+if = ["phase011"]
+else = ["phase012"]
+[[graph.vertex]]
+processor = "phase011"
+[[graph.vertex]]
+processor = "phase012"
+
+
+
+
+
+

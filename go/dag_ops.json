@@ -1,0 +1,304 @@
+[
+    {
+        "name": "noop",
+        "source": "/data/DeepDist/didagle/go/operator.go",
+        "line": 142
+    },
+    {
+        "name": "phase000",
+        "source": "/data/DeepDist/didagle/go/dag0_test.go",
+        "line": 164,
+        "output": [
+            {
+                "name": "str",
+                "id": 24,
+                "type": "string",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "integer",
+                "id": 2,
+                "type": "int",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "float",
+                "id": 13,
+                "type": "float32",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "obj",
+                "id": 25,
+                "type": "github.com/yinqiwen/didagle/go/FF",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "intf",
+                "id": 20,
+                "type": "github.com/yinqiwen/didagle/go/F",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            }
+        ]
+    },
+    {
+        "name": "phase001",
+        "source": "/data/DeepDist/didagle/go/dag0_test.go",
+        "line": 165,
+        "input": [
+            {
+                "name": "float",
+                "id": 13,
+                "type": "float32",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "obj",
+                "id": 25,
+                "type": "github.com/yinqiwen/didagle/go/FF",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "intf",
+                "id": 20,
+                "type": "github.com/yinqiwen/didagle/go/F",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "str",
+                "id": 24,
+                "type": "string",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "integer",
+                "id": 2,
+                "type": "int",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            }
+        ]
+    },
+    {
+        "name": "phase010",
+        "source": "/data/DeepDist/didagle/go/dag0_test.go",
+        "line": 166,
+        "params": [
+            {
+                "name": "errFlag",
+                "type": "bool"
+            }
+        ]
+    },
+    {
+        "name": "phase012",
+        "source": "/data/DeepDist/didagle/go/dag0_test.go",
+        "line": 168
+    },
+    {
+        "name": "ispine_didagle_expr",
+        "source": "/data/DeepDist/didagle/go/gval_op.go",
+        "line": 252
+    },
+    {
+        "name": "ispine_didagle_while",
+        "source": "/data/DeepDist/didagle/go/gval_op.go",
+        "line": 253
+    },
+    {
+        "name": "phase011",
+        "source": "/data/DeepDist/didagle/go/dag0_test.go",
+        "line": 167
+    },
+    {
+        "name": "phase0",
+        "source": "/data/DeepDist/didagle/go/dag1_test.go",
+        "line": 83,
+        "output": [
+            {
+                "name": "phase0MapOut",
+                "id": 21,
+                "type": "",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "phase0SliceOut",
+                "id": 23,
+                "type": "",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            }
+        ]
+    },
+    {
+        "name": "phase1",
+        "source": "/data/DeepDist/didagle/go/dag1_test.go",
+        "line": 84,
+        "input": [
+            {
+                "name": "mapInput",
+                "id": 21,
+                "type": "",
+                "flags": {
+                    "is_extern": 1,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "sliceInput",
+                "id": 23,
+                "type": "",
+                "flags": {
+                    "is_extern": 1,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "phase0MapOut",
+                "id": 21,
+                "type": "",
+                "flags": {
+                    "is_extern": 1,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            },
+            {
+                "name": "phase0SliceOut",
+                "id": 23,
+                "type": "",
+                "flags": {
+                    "is_extern": 1,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            }
+        ],
+        "output": [
+            {
+                "name": "counter",
+                "id": 2,
+                "type": "int",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            }
+        ],
+        "params": [
+            {
+                "name": "key0",
+                "type": "string"
+            },
+            {
+                "name": "loopIdx",
+                "type": "int"
+            },
+            {
+                "name": "intArgs",
+                "type": ""
+            },
+            {
+                "name": "floatArgs",
+                "type": ""
+            },
+            {
+                "name": "strArgs",
+                "type": ""
+            },
+            {
+                "name": "boolArgs",
+                "type": ""
+            }
+        ]
+    },
+    {
+        "name": "phase2",
+        "source": "/data/DeepDist/didagle/go/dag1_test.go",
+        "line": 85,
+        "output": [
+            {
+                "name": "data",
+                "id": 24,
+                "type": "string",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 0
+                }
+            }
+        ],
+        "params": [
+            {
+                "name": "key0",
+                "type": "string"
+            }
+        ]
+    },
+    {
+        "name": "phase3",
+        "source": "/data/DeepDist/didagle/go/dag1_test.go",
+        "line": 86,
+        "input": [
+            {
+                "name": "mapData",
+                "id": 24,
+                "type": "string",
+                "flags": {
+                    "is_extern": 0,
+                    "is_in_out": 0,
+                    "is_aggregate": 1
+                }
+            }
+        ]
+    }
+]

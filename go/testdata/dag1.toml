@@ -1,0 +1,98 @@
+strict_dsl = true
+[[config_setting]]
+name="flag0"
+cond="ARGS.flag0==101"
+[[config_setting]]
+name="flag1"
+cond="ARGS.flag1==102"
+
+
+[[graph]]
+name = "graph0"
+[[graph.vertex]]
+processor = "phase0"
+successor = ["phase1"]
+[[graph.vertex]]
+expect='ARGS.key=="hello"'
+processor = "phase1"
+
+
+[[graph]]
+name = "graph1"
+[[graph.vertex]]
+processor = "phase0"
+successor = ["phase1", "phase2"]
+[[graph.vertex]]
+expect_config='flag0'
+processor = "phase1"
+select_args=[
+    {match='flag1', args={ key0 = "match1"}},
+    {match='ARGS.flag0==101', args={ key0 = "match0"}},
+]
+args = {key0="default"}
+[[graph.vertex]]
+expect_config='!flag0'
+processor = "phase2"
+args = {key0="test"}
+
+[[graph]]
+name = "graph2"
+[[graph.vertex]]
+processor = "phase0"
+successor = ["phase1", "subgraph"]
+[[graph.vertex]]
+expect_config='flag0'
+processor = "phase1"
+select_args=[
+    {match='flag1', args={ key0 = "match1"}},
+    {match='ARGS.flag0==101', args={ key0 = "match0"}},
+]
+args = {key0="default"}
+[[graph.vertex]]
+id = "subgraph"
+cluster="."
+graph = "graph1"
+args={flag0=102}
+
+
+[[graph]]
+name = "graph3"
+[[graph.vertex]]
+id="input0"
+processor = "phase2"
+output = [{ field = "data", id = "m0" }]
+args={key0="input0"}
+[[graph.vertex]]
+id="input1"
+processor = "phase2"
+output = [{ field = "data", id = "m1" }]
+args={key0="input1"}
+[[graph.vertex]]
+id="input2"
+processor = "phase2"
+output = [{ field = "data", id = "m2" }]
+args={key0="input2"}
+[[graph.vertex]]
+processor = "phase3"
+input = [{ field = "mapData", aggregate = ["m0", "m1", "m2"] }]  
+
+
+[[graph]]
+name = "while_exec"
+[[graph.vertex]]
+processor = "phase0"
+successor = ["phase1"]
+[[graph.vertex]]
+processor = "phase1"
+args={intArgs=[1,2,3], floatArgs=[1.1,2.2,3.3], strArgs=["a","b"], boolArgs=[false, true]}
+
+
+[[graph]]
+name = "while_graph"
+[[graph.vertex]]
+while = "ARGS.loopIdx<ARGS.loopCounter"
+graph = "while_exec"
+async = false
+start = true
+
+
