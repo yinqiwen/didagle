@@ -16,8 +16,8 @@
 #include <vector>
 
 #include "boost/functional/hash.hpp"
-#include "concurrentqueue.h"
 #include "folly/concurrency/AtomicSharedPtr.h"
+#include "folly/concurrency/UnboundedQueue.h"
 #include "folly/container/F14Map.h"
 
 #include "didagle/graph_executor.h"
@@ -68,8 +68,9 @@ struct GraphCluster {
   GraphManager* _graph_manager = nullptr;
   bool _builded = false;
 
-  // tbb::concurrent_queue<GraphClusterContext *> _graph_cluster_context_pool;
-  moodycamel::ConcurrentQueue<GraphClusterContext*> _graph_cluster_context_pool;
+  using ContextPool = folly::UMPMCQueue<GraphClusterContext*, false>;
+  // using ContextPool =  moodycamel::ConcurrentQueue<GraphClusterContext*>;
+  ContextPool _graph_cluster_context_pool;
   KCFG_TOML_DEFINE_FIELDS(desc, strict_dsl, default_expr_processor, default_context_pool_size, graph, config_setting)
 
   int Build();

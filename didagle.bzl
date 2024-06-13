@@ -167,28 +167,6 @@ cc_library(
         ],
     )
 
-    _CQ_BUILD_FILE = """
-cc_library(
-    name = "concurrentqueue",
-    hdrs = glob([
-        "**/*.h",
-    ]),
-    includes=["./"],
-    visibility = [ "//visibility:public" ],
-)
-"""
-    concurrentqueue_ver = kwargs.get("concurrentqueue_ver", "1.0.3")
-    concurrentqueue_name = "concurrentqueue-{ver}".format(ver = concurrentqueue_ver)
-    http_archive(
-        name = "com_github_cameron314_concurrentqueue",
-        strip_prefix = concurrentqueue_name,
-        build_file_content = _CQ_BUILD_FILE,
-        urls = [
-            "https://mirrors.tencent.com/github.com/cameron314/concurrentqueue/archive/v{ver}.tar.gz".format(ver = concurrentqueue_ver),
-            "https://github.com/cameron314/concurrentqueue/archive/refs/tags/v{ver}.tar.gz".format(ver = concurrentqueue_ver),
-        ],
-    )
-
     gtest_ver = kwargs.get("gtest_ver", "1.14.0")
     gtest_name = "googletest-{ver}".format(ver = gtest_ver)
     http_archive(

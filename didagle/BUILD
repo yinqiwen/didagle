@@ -34,7 +34,6 @@ cc_library(
         "graph_vertex.h",
     ],
     deps = [
-        "@com_github_cameron314_concurrentqueue//:concurrentqueue",
         "@com_github_spdlog//:spdlog",
         "@com_google_protobuf//:protobuf",
         "@kcfg",
