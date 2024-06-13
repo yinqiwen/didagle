@@ -1,0 +1,20 @@
+name = "Example1"
+strict_dsl = true
+
+[[graph]]
+name = "test"
+[[graph.vertex]]
+processor = "test0"
+start=true
+[[graph.vertex]]
+processor = "test1"
+[[graph.vertex]]
+processor = "test2"
+[[graph.vertex]]
+processor = "test3"
+[[graph.vertex]]
+processor = "test4"
+
+
+
+
