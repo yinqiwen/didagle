@@ -76,19 +76,19 @@ struct Reset<std::vector<T>> {
   inline void operator()(std::vector<T>& t) { t.clear(); }
 };
 
-template <typename T>
-struct Prepare {
-  inline void operator()(T& t) {
-    if constexpr (std::is_base_of_v<::google::protobuf::Message, T> || is_pb_repeated_ptr<T>::value ||
-                  is_pb_repeated<T>::value) {
-      // if (FLAGS_didagle_reuse_proto_obj) {
-      //   T* obj = ispine::ObjPool<T>::GetInstance()->GetRaw();
-      //   t.Swap(obj);
-      //   delete obj;
-      //   return;
-      // }
-    }
-  }
-};
+// template <typename T>
+// struct Prepare {
+//   inline void operator()(T& t) {
+//     if constexpr (std::is_base_of_v<::google::protobuf::Message, T> || is_pb_repeated_ptr<T>::value ||
+//                   is_pb_repeated<T>::value) {
+//       // if (FLAGS_didagle_reuse_proto_obj) {
+//       //   T* obj = ispine::ObjPool<T>::GetInstance()->GetRaw();
+//       //   t.Swap(obj);
+//       //   delete obj;
+//       //   return;
+//       // }
+//     }
+//   }
+// };
 
 }  // namespace didagle

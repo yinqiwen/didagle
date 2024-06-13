@@ -69,8 +69,8 @@ struct DAGEventTracker {
   using SweepFunc = std::function<void(const DAGEvent*)>;
   DAGEvent::List events;
   DAGEventTracker() {}
-  void Add(std::unique_ptr<DAGEvent>&& event) { events.insertHead(event.release()); }
-  void Sweep(SweepFunc&& f) {
+  inline void Add(std::unique_ptr<DAGEvent>&& event) { events.insertHead(event.release()); }
+  inline void Sweep(SweepFunc&& f) {
     events.sweep([f = std::move(f)](DAGEvent* event) {
       f(event);
       delete event;

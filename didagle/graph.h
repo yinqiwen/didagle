@@ -86,10 +86,7 @@ struct GraphCluster {
 class GraphContext;
 class GraphManager {
  private:
-  // typedef tbb::concurrent_hash_map<std::string, std::shared_ptr<GraphCluster>> ClusterGraphTable;
-  // typedef folly::ConcurrentHashMap<std::string, folly::atomic_shared_ptr<GraphCluster>>
-  //     ClusterGraphTable;
-  typedef folly::F14NodeMap<std::string, folly::atomic_shared_ptr<GraphCluster>> ClusterGraphTable;
+  using ClusterGraphTable = folly::F14NodeMap<std::string, folly::atomic_shared_ptr<GraphCluster>>;
   ClusterGraphTable _graphs;
   GraphExecuteOptions _exec_options;
   std::mutex _graphs_mutex;

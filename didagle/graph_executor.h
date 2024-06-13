@@ -130,7 +130,7 @@ class GraphContext {
   int Execute(DoneClosure&& done);
   inline GraphDataContext* GetGraphDataContext() { return _data_ctx.get(); }
   inline GraphDataContext& GetGraphDataContextRef() { return *(GetGraphDataContext()); }
-  void SetGraphDataContext(GraphDataContext* p);
+  inline void SetGraphDataContext(GraphDataContext* p) { _data_ctx->SetParent(p); }
 };
 
 struct ConfigSettingContext {
@@ -152,15 +152,15 @@ class GraphClusterContext {
   uint64_t _end_ustime = 0;
 
  public:
-  void SetExternGraphDataContext(GraphDataContext* p) { _extern_data_ctx = p; }
-  uint64_t GetEndTime() { return _end_ustime; }
-  void SetEndTime(const uint64_t end_ustime) { _end_ustime = end_ustime; }
-  void SetExecuteParams(const Params* p) { _exec_params = p; }
-  const Params* GetExecuteParams() const { return _exec_params; }
+  inline void SetExternGraphDataContext(GraphDataContext* p) { _extern_data_ctx = p; }
+  inline uint64_t GetEndTime() { return _end_ustime; }
+  inline void SetEndTime(const uint64_t end_ustime) { _end_ustime = end_ustime; }
+  inline void SetExecuteParams(const Params* p) { _exec_params = p; }
+  inline const Params* GetExecuteParams() const { return _exec_params; }
   inline GraphCluster* GetCluster() { return _cluster; }
+  inline void SetRunningCluster(std::shared_ptr<GraphCluster> c) { _running_cluster = c; }
+  inline std::shared_ptr<GraphCluster> GetRunningCluster() { return _running_cluster; }
   GraphContext* GetRunGraph(const std::string& name);
-  void SetRunningCluster(std::shared_ptr<GraphCluster> c) { _running_cluster = c; }
-  std::shared_ptr<GraphCluster> GetRunningCluster() { return _running_cluster; }
   int Setup(GraphCluster* c);
   void Reset();
   int Execute(const std::string& graph, DoneClosure&& done, GraphContext*& graph_ctx);

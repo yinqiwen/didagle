@@ -45,7 +45,7 @@ int VertexContext::Setup(GraphContext* g, Vertex* v) {
   // todo get processor
   if (!_vertex->graph.empty()) {
     if (!_vertex->while_cluster.empty()) {
-      _processor = ProcessorFactory::GetProcessor(kDefaultWhileOperatorName);
+      _processor = ProcessorFactory::GetProcessor(std::string(kDefaultWhileOperatorName));
     } else {
       // get subgraph at runtime
       // remove suffix
@@ -107,10 +107,10 @@ int VertexContext::Setup(GraphContext* g, Vertex* v) {
       _params.SetString(_vertex->cond);
     }
     if (!_vertex->while_cluster.empty()) {
-      _params[kExprParamKey].SetString(_vertex->while_cluster);
-      _params[kWhileExecCluterParamKey].SetString(_vertex->cluster);
-      _params[kWhileExecGraphParamKey].SetString(_vertex->graph);
-      _params[kWhileAsyncExecParamKey].SetBool(_vertex->while_async);
+      _params[std::string(kExprParamKey)].SetString(_vertex->while_cluster);
+      _params[std::string(kWhileExecCluterParamKey)].SetString(_vertex->cluster);
+      _params[std::string(kWhileExecGraphParamKey)].SetString(_vertex->graph);
+      _params[std::string(kWhileAsyncExecParamKey)].SetBool(_vertex->while_async);
     }
     return _processor->Setup(_params);
   }
@@ -420,6 +420,8 @@ GraphContext::GraphContext() : _cluster(nullptr), _graph(nullptr), _children_cou
   _data_ctx = GraphDataContext::New();
 }
 
+GraphCluster* GraphContext::GetGraphCluster() { return _graph->_cluster; }
+
 int GraphContext::Setup(GraphClusterContext* c, Graph* g) {
   _cluster = c;
   _graph = g;
@@ -476,14 +478,6 @@ int GraphContext::Setup(GraphClusterContext* c, Graph* g) {
         if (!entry.info.flags.is_extern) {
           entry.idx = static_cast<int32_t>(_data_ctx->RegisterData(key));
         }
-        //_all_input_ids.insert(key);
-        // if (nullptr != data && data->move) {
-        //   if (move_ids.count(key) > 0) {
-        //     DIDAGLE_ERROR("Graph:{} have duplicate moved data name:{}.",
-        //     g->name, key.name); return -1;
-        //   }
-        //   move_ids.insert(key);
-        // }
       }
       for (auto& entry : di->GetOutputIds()) {
         const DIObjectKey& key = entry.info;
@@ -579,12 +573,6 @@ void GraphContext::OnVertexDone(VertexContext* vertex) {
   std::vector<VertexContext*> ready_successors;
   size_t successor_num = vertex->_successor_ctxs.size();
   for (size_t i = 0; i < successor_num; i++) {
-    // VertexContext* successor_ctx = FindVertexContext(successor);
-    // if (nullptr == successor_ctx) {
-    //   // error
-    //   abort();
-    //   continue;
-    // }
     VertexContext* successor_ctx = vertex->_successor_ctxs[i];
     uint32_t wait_num = successor_ctx->SetDependencyResult(vertex->_successor_dep_idxs[i], vertex->GetResult());
     // DIDAGLE_DEBUG("[{}]Successor:{} wait_num:{}.", vertex->GetVertex()->id, successor->id, wait_num);
@@ -600,38 +588,9 @@ void GraphContext::OnVertexDone(VertexContext* vertex) {
   }
   ExecuteReadyVertexs(ready_successors);
 }
-GraphCluster* GraphContext::GetGraphCluster() { return _graph->_cluster; }
-// GraphDataContext* GraphContext::GetGraphDataContext() { return _data_ctx.get(); }
-void GraphContext::SetGraphDataContext(GraphDataContext* p) { _data_ctx->SetParent(p); }
 
 int GraphContext::Execute(DoneClosure&& done) {
   _done = std::move(done);
-  // make all data entry precreated in data ctx
-  // for (const auto& id : _all_input_ids) {
-  //   _data_ctx->RegisterData(id);
-  // }
-  // for (const auto& id : _all_output_ids) {
-  //   if (id.name[0] == '$') {
-  //     auto new_id = id;
-  //     auto var_value = GetGraphClusterContext()->GetExecuteParams()->GetVar(id.name.substr(1));
-  //     if (!var_value.String().empty()) {
-  //       new_id.name = var_value.String();
-  //       _data_ctx->RegisterData(new_id);
-  //     } else {
-  //       DIDAGLE_ERROR("[{}/{}]has invalid output with name:{}", _cluster->GetCluster()->_name, _graph->name,
-  //       id.name);
-  //     }
-  //   } else {
-  //     _data_ctx->RegisterData(id);
-  //   }
-  // }
-  // std::vector<VertexContext*> ready_successors;
-  // for (auto& pair : _vertex_context_table) {
-  //   std::shared_ptr<VertexContext>& ctx = pair.second;
-  //   if (ctx->Ready()) {
-  //     ready_successors.emplace_back(ctx.get());
-  //   }
-  // }
   ExecuteReadyVertexs(_start_ctxs);
   return 0;
 }

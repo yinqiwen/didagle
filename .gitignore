@@ -4,3 +4,4 @@ a.out
 *.pb.h
 bazel-*
 perf.data*
+compile_commands.json
