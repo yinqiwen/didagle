@@ -1,8 +1,8 @@
 // Copyright (c) 2020, Tencent Inc.
 // All rights reserved.
 #include <thread>
-#include "didagle/didagle_log.h"
-#include "didagle/graph_processor_api.h"
+#include "didagle/log/log.h"
+#include "didagle/processor/api.h"
 
 GRAPH_CORO_OP_BEGIN(coro_phase2, "this is test coro phase")
 GRAPH_OP_INPUT(std::string, v0)

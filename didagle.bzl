@@ -97,6 +97,7 @@ cc_library(
     ]),
     defines = ["SPDLOG_FMT_EXTERNAL", "SPDLOG_COMPILED_LIB"],
     includes = ["include"],
+    linkopts = ["-L/usr/local/lib64","-lfmt"],
     visibility = ["//visibility:public"],
 )
 """

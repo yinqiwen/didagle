@@ -10,16 +10,14 @@
 
 #include "boost/asio/post.hpp"
 #include "boost/asio/thread_pool.hpp"
-#include "didagle/didagle_event.h"
 #include "folly/Singleton.h"
 #include "folly/synchronization/HazptrThreadPoolExecutor.h"
 #include "folly/synchronization/Latch.h"
 #include "spdlog/spdlog.h"
 
-#include "didagle/didagle_background.h"
-#include "didagle/didagle_log.h"
-#include "didagle/graph.h"
-#include "didagle/graph_processor.h"
+#include "didagle/log/log.h"
+#include "didagle/store/graph_store.h"
+#include "didagle/trace/event.h"
 
 DEFINE_string(script, "", "script name");
 DEFINE_string(graph, "", "graph name");
@@ -59,7 +57,7 @@ int main(int argc, char** argv) {
 
   boost::asio::thread_pool pool(8);
   GraphExecuteOptions exec_opt;
-  exec_opt.concurrent_executor = [&pool](AnyClosure&& r) {
+  exec_opt.async_executor = [&pool](AnyClosure&& r) {
     boost::asio::post(pool, r);
     // r();
   };
@@ -71,7 +69,7 @@ int main(int argc, char** argv) {
     // }
   };
   {
-    GraphManager graphs(exec_opt);
+    GraphStore graphs(exec_opt);
     std::string config = FLAGS_script;
     std::string graph = FLAGS_graph;
 

@@ -3,8 +3,8 @@
 
 #include <benchmark/benchmark.h>
 #include <sys/time.h>
-#include "didagle/graph_processor.h"
-#include "didagle/graph_processor_api.h"
+#include "didagle/processor/api.h"
+#include "didagle/processor/processor.h"
 using namespace didagle;
 
 GRAPH_OP_BEGIN(test_phase)

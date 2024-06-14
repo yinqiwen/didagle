@@ -5,11 +5,11 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "didagle/graph.h"
+#include "didagle/store/graph_store.h"
 using namespace didagle;
 int main(int argc, char** argv) {
   GraphExecuteOptions exec_opt;
-  GraphManager grpahs(exec_opt);
+  GraphStore grpahs(exec_opt);
   std::string config = "./graph.toml";
   if (argc > 1) {
     config = argv[1];
@@ -20,12 +20,9 @@ int main(int argc, char** argv) {
     printf("Failed to parse toml\n");
     return -1;
   }
-  if (0 != cluster->Build()) {
-    printf("Failed to build graph cluster\n");
-    return -1;
-  }
+
   std::string dot;
-  cluster->DumpDot(dot);
+  cluster->cluster.DumpDot(dot);
   std::string dot_file = config + ".dot";
   std::ofstream out(dot_file);
   out << dot;

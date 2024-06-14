@@ -4,8 +4,8 @@
 #include <gtest/gtest.h>
 #include <stdint.h>
 #include <string>
-#include "didagle/graph_processor.h"
-#include "didagle/graph_processor_api.h"
+#include "didagle/processor/api.h"
+#include "didagle/processor/processor.h"
 using namespace didagle;
 
 GRAPH_OP_BEGIN(test_phase)

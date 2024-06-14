@@ -39,7 +39,7 @@ cc_library(
     ],
     hdrs = ["expr.h"],
     deps = [
-        "//didagle:didagle_core",
+        "//didagle/processor",
         "@ssexpr//ssexpr",
     ],
     alwayslink = True,
@@ -50,7 +50,7 @@ cc_binary(
     linkopts = LINKOPTS,
     deps = [
         ":processor_lib",
-        "//didagle:didagle_processor_dump",
+        "//didagle/tools:processor_dump",
     ],
 )
 
@@ -60,7 +60,7 @@ cc_binary(
     linkopts = LINKOPTS,
     deps = [
         ":processor_lib",
-        "//didagle:didagle_core",
+        "//didagle/store",
     ],
 )
 
@@ -70,7 +70,7 @@ cc_binary(
     linkopts = LINKOPTS,
     deps = [
         ":processor_lib",
-        "//didagle:didagle_core",
+        "//didagle/store",
     ],
 )
 
@@ -83,7 +83,7 @@ cc_library(
     ],
     hdrs = ["expr.h"],
     deps = [
-        "//didagle:didagle_core",
+        "//didagle/store",
         "@ssexpr//ssexpr",
     ],
     alwayslink = True,

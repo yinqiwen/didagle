@@ -12,10 +12,9 @@
 #include "folly/synchronization/HazptrThreadPoolExecutor.h"
 #include "folly/synchronization/Latch.h"
 
-#include "didagle/didagle_background.h"
-#include "didagle/didagle_log.h"
-#include "didagle/graph.h"
-#include "didagle/graph_processor.h"
+#include "didagle/log/log.h"
+#include "didagle/processor/api.h"
+#include "didagle/store/graph_store.h"
 #include "expr.h"
 
 DEFINE_bool(reuse_didagle_proto_object, false, "reuse didagle proto objects");
@@ -42,13 +41,13 @@ int main(int argc, char** argv) {
 
   boost::asio::thread_pool pool(8);
   GraphExecuteOptions exec_opt;
-  exec_opt.concurrent_executor = [&pool](AnyClosure&& r) {
+  exec_opt.async_executor = [&pool](AnyClosure&& r) {
     boost::asio::post(pool, r);
     // r();
   };
   exec_opt.event_reporter = [](DAGEvent event) {};
   {
-    GraphManager graphs(exec_opt);
+    GraphStore graphs(exec_opt);
     std::string config = "./graph.toml";
     std::string graph = "sub_graph0";
     if (argc > 1) {

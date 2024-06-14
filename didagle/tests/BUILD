@@ -3,8 +3,8 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
 LINKOPTS = [
     "-L/usr/local/lib",
     "-L/usr/local/lib64",
-    "-lfolly",
     "-lfmt",
+    "-lfolly",
     "-lgflags",
     "-lglog",
     "-ldouble-conversion",
@@ -26,7 +26,7 @@ cc_test(
     srcs = ["test_di.cpp"],
     linkopts = LINKOPTS,
     deps = [
-        "//didagle:didagle_core",
+        "//didagle/di:container",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -37,7 +37,7 @@ cc_test(
     srcs = ["test_processor.cpp"],
     linkopts = LINKOPTS,
     deps = [
-        "//didagle:didagle_core",
+        "//didagle/processor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -47,7 +47,7 @@ cc_binary(
     srcs = ["test_proc_bench.cpp"],
     linkopts = LINKOPTS,
     deps = [
-        "//didagle:didagle_core",
+        "//didagle/processor",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
@@ -60,6 +60,15 @@ cc_binary(
     ],
     linkopts = LINKOPTS,
     deps = [
-        "//didagle:didagle_core",
+        "//didagle/store",
+    ],
+)
+
+cc_binary(
+    name = "test_task",
+    srcs = ["test_task.cpp"],
+    linkopts = LINKOPTS,
+    deps = [
+        "//didagle",
     ],
 )

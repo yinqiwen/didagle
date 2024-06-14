@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 #include <stdint.h>
 #include <string>
-#include "didagle/di_container.h"
+#include "didagle/di/container.h"
 using namespace didagle;
 struct TestPOD {
   int a = 101;
