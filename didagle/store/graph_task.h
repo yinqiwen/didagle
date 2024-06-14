@@ -51,6 +51,12 @@ class Task {
   void Precede(Task& task);
   void Succeed(TaskPtr task) { Succeed(*task); }
   void Succeed(Task& task);
+
+  void Consequent(Task& task);
+  void Consequent(TaskPtr task) { Consequent(*task); }
+  void Alternative(Task& task);
+  void Alternative(TaskPtr task) { Alternative(*task); }
+
   const std::string& Id() const { return id_; }
   void Name(const std::string& name) { id_ = name; }
 
@@ -60,6 +66,8 @@ class Task {
   std::string group_id_;
   std::set<std::string> precede_;
   std::set<std::string> succeed_;
+  std::set<std::string> consequent_;
+  std::set<std::string> alternative_;
   friend class TaskGroup;
   friend class GraphStore;
 };

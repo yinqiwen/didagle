@@ -53,6 +53,14 @@ void Task::Precede(Task& task) {
   task.precede_.insert(id_);
 }
 void Task::Succeed(Task& task) { task.Precede(*this); }
+void Task::Consequent(Task& task) {
+  consequent_.insert(task.id_);
+  task.precede_.insert(id_);
+}
+void Task::Alternative(Task& task) {
+  alternative_.insert(task.id_);
+  task.precede_.insert(id_);
+}
 
 TaskGroup::TaskGroup() {
   std::string s(k_task_group_prefix);

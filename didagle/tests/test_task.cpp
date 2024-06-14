@@ -41,7 +41,7 @@ static void test0(GraphStore& store) {
   fmt::print("##counter:{}\n", counter);
 }
 
-static void test1(GraphStore& store) {
+static void test_sub_task_group(GraphStore& store) {
   auto group0 = TaskGroup::New();
   int counter = 0;
   auto a = group0->Add([&](const Params& args) -> int {
@@ -80,6 +80,27 @@ static void test1(GraphStore& store) {
 
   fmt::print("##counter:{}\n", counter);
 }
+static void test_if_else(GraphStore& store) {
+  auto group = TaskGroup::New();
+  int counter = 0;
+  auto a = group->Add([&](const Params& args) -> int { return 1; });
+  auto b = group->Add([&](const Params& args) -> int {
+    counter = 100;
+    return 0;
+  });
+  auto c = group->Add([&](const Params& args) -> int {
+    counter = 200;
+    return 0;
+  });
+
+  a->Consequent(b);
+  a->Alternative(c);
+
+  int rc = store.SyncExecute(group);
+  fmt::print("##rc:{}\n", rc);
+
+  fmt::print("##counter:{}\n", counter);
+}
 
 int main() {
   folly::SingletonVault::singleton()->registrationComplete();
@@ -90,7 +111,8 @@ int main() {
   exec_opt.latch_creator = new_folly_latch;
   GraphStore store(exec_opt);
   test0(store);
-  test1(store);
+  test_sub_task_group(store);
+  test_if_else(store);
   pool.join();
   return 0;
 }
