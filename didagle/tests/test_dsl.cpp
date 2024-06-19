@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
         graph_run_us += (gettimeofday_us() - exec_start_us);
 
         auto event_tracker = root->GetEventTracker();
-        event_tracker->Sweep([&](const DAGEvent* event) {
+        event_tracker->Sweep([&](DAGEvent* event) -> EventReportStatus {
           if (!event->processor.empty()) {
             proc_run_total_us += (event->end_ustime - event->start_ustime);
           } else {
@@ -155,6 +155,7 @@ int main(int argc, char** argv) {
               }
             }
           }
+          return EventReportStatus::STATUS_NORMAL;
         });
 
         root->Reset();

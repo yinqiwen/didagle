@@ -5,7 +5,7 @@
 #include "didagle/tests/test_common.h"
 
 using namespace didagle;
-TEST(Task, ifelse) {
+TEST(Task, if_else) {
   TestContext ctx;
   auto group = TaskGroup::New();
   int flag = 1;  // else

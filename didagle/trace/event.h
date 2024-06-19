@@ -65,15 +65,22 @@ struct DAGEvent {
   using List = folly::AtomicIntrusiveLinkedList<DAGEvent, &DAGEvent::_hook>;
 };
 
+enum EventReportStatus {
+  STATUS_NORMAL = 0,
+  STATUS_KEEP,  // keep by event reporter
+};
+
 struct DAGEventTracker {
-  using SweepFunc = std::function<void(const DAGEvent*)>;
+  using SweepFunc = std::function<EventReportStatus(DAGEvent*)>;
   DAGEvent::List events;
   DAGEventTracker() {}
   inline void Add(std::unique_ptr<DAGEvent>&& event) { events.insertHead(event.release()); }
   inline void Sweep(SweepFunc&& f) {
     events.sweep([f = std::move(f)](DAGEvent* event) {
-      f(event);
-      delete event;
+      auto status = f(event);
+      if (status != STATUS_KEEP) {
+        delete event;
+      }
     });
   }
   ~DAGEventTracker() {
