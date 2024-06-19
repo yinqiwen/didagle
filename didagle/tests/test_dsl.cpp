@@ -170,11 +170,6 @@ int main(int argc, char** argv) {
     fmt::print("graph prepare run cost {}us\n", graph_prepare_run_us);
 
     fmt::print("gap {}us\n", graph_run_us - proc_run_total_us);
-    // for (int i = 0; i < 1; i++) {
-    //   graphs.Execute(root, cluster_name, graph, &paras,
-    //                  [](int c) { DIDAGLE_ERROR("Graph done with {}", c); });
-    //   sleep(1);
-    // }
   }
   pool.join();
 

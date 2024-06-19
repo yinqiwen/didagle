@@ -101,7 +101,7 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 """
-    spdlog_ver = kwargs.get("spdlog_ver", "1.10.0")
+    spdlog_ver = kwargs.get("spdlog_ver", "1.14.1")
     spdlog_name = "spdlog-{ver}".format(ver = spdlog_ver)
     http_archive(
         name = "com_github_spdlog",

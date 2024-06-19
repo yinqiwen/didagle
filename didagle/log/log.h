@@ -3,12 +3,13 @@
 // Created on 2021/04/19
 // Authors: qiyingwang (qiyingwang@tencent.com)
 #pragma once
-#include <fmt/core.h>
+
 #include <stdio.h>
 #include <atomic>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <vector>
 #include "spdlog/logger.h"
 
 #include "fmt/ostream.h"  // do NOT put this line before spdlog
