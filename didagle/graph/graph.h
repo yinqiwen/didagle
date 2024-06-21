@@ -52,6 +52,7 @@ struct Graph {
 class GraphManager;
 // class GraphClusterContext;
 struct GraphCluster {
+  std::string name;
   std::string desc;
   bool strict_dsl = true;
   std::string default_expr_processor;
@@ -67,7 +68,8 @@ struct GraphCluster {
 
   // using ContextPool = folly::UMPMCQueue<GraphClusterContext*, false>;
   // ContextPool _graph_cluster_context_pool;
-  KCFG_TOML_DEFINE_FIELDS(desc, strict_dsl, default_expr_processor, default_context_pool_size, graph, config_setting)
+  KCFG_TOML_DEFINE_FIELDS(name, desc, strict_dsl, default_expr_processor, default_context_pool_size, graph,
+                          config_setting)
 
   int Build();
   bool ContainsConfigSetting(const std::string& name);

@@ -20,10 +20,13 @@ class GraphStore {
  public:
   explicit GraphStore(const GraphExecuteOptions& options);
   std::shared_ptr<GraphClusterHandle> Load(const std::string& file);
+  std::shared_ptr<GraphClusterHandle> LoadString(const std::string& content);
   std::shared_ptr<GraphClusterHandle> FindGraphClusterByName(const std::string& name);
   GraphClusterContext* GetGraphClusterContext(const std::string& cluster);
-  int Execute(GraphDataContextPtr data_ctx, const std::string& cluster, const std::string& graph, const Params* params,
+  int Execute(GraphDataContextPtr data_ctx, const std::string& cluster, const std::string& graph, ParamsPtr params,
               DoneClosure&& done, uint64_t time_out_ms = 0);
+  int SyncExecute(GraphDataContextPtr data_ctx, const std::string& cluster, const std::string& graph,
+                  ParamsPtr params = nullptr, uint64_t time_out_ms = 0);
   bool Exists(const std::string& cluster, const std::string& graph);
 
   int AsyncExecute(TaskGroupPtr graph, DoneClosure&& done, uint64_t time_out_ms = 0);

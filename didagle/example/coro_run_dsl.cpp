@@ -90,7 +90,8 @@ int main(int argc, char** argv) {
       std::unique_ptr<std::string> uuu(new std::string("hello, unique!"));
       root->Set("ustr", &uuu);
     }
-    graphs.Execute(root, cluster_name, graph, &paras, [](int c) { DIDAGLE_ERROR("Graph done with {}", c); });
+    auto params_ptr = Params::New(std::move(paras));
+    graphs.Execute(root, cluster_name, graph, params_ptr, [](int c) { DIDAGLE_ERROR("Graph done with {}", c); });
 
     // for (int i = 0; i < 1; i++) {
     //   graphs.Execute(root, cluster_name, graph, &paras,

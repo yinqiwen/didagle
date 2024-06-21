@@ -61,6 +61,18 @@ void GraphDataContext::Reset() {
     _executed_childrens[i] = nullptr;
   }
   _disable_entry_creation = false;
+  if (user_ctx_destroy_) {
+    user_ctx_destroy_(user_ctx_);
+    user_ctx_ = nullptr;
+  }
+}
+GraphDataContext::~GraphDataContext() {
+  if (release_closure_) {
+    release_closure_(0);
+  }
+  if (nullptr != user_ctx_ && user_ctx_destroy_) {
+    user_ctx_destroy_(user_ctx_);
+  }
 }
 
 DataValue *GraphDataContext::GetValue(const DIObjectKeyView &key, GraphDataGetOptions opt,
@@ -120,7 +132,11 @@ int GraphDataContext::Move(const DIObjectKey &from, const DIObjectKey &to) {
   return 0;
 }
 
-void GraphDataContext::ReserveChildCapacity(size_t n) { _executed_childrens.resize(n); }
+void GraphDataContext::ReserveChildCapacity(size_t n) {
+  if (_executed_childrens.size() < n) {
+    _executed_childrens.resize(n);
+  }
+}
 void GraphDataContext::SetChild(const GraphDataContext *c, size_t idx) {
   if (idx >= _executed_childrens.size()) {
     return;

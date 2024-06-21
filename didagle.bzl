@@ -104,7 +104,7 @@ cc_library(
     spdlog_ver = kwargs.get("spdlog_ver", "1.14.1")
     spdlog_name = "spdlog-{ver}".format(ver = spdlog_ver)
     http_archive(
-        name = "com_github_spdlog",
+        name = "spdlog",
         strip_prefix = spdlog_name,
         urls = [
             "https://mirrors.tencent.com/github.com/gabime/spdlog/archive/v{ver}.tar.gz".format(ver = spdlog_ver),

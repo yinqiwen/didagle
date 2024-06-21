@@ -5,7 +5,7 @@ LINKOPTS = [
     "-L/usr/local/lib64",
     "-lfolly",
     "-lfmt",
-    # "-lgflags",
+    "-lgflags",
     "-lglog",
     "-ldouble-conversion",
     "-liberty",
@@ -52,9 +52,9 @@ cc_test(
 )
 
 cc_test(
-    name = "test_if_else",
+    name = "test_simple_task",
     size = "small",
-    srcs = ["test_if_else.cpp"],
+    srcs = ["test_simple_task.cpp"],
     linkopts = LINKOPTS,
     linkstatic = True,
     deps = [
@@ -64,9 +64,33 @@ cc_test(
 )
 
 cc_test(
-    name = "test_simple_task",
+    name = "test_simple_graph",
     size = "small",
-    srcs = ["test_simple_task.cpp"],
+    srcs = ["test_simple_graph.cpp"],
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    deps = [
+        ":test_common",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_map_aggegate",
+    size = "small",
+    srcs = ["test_map_aggegate.cpp"],
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    deps = [
+        ":test_common",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_graph_params",
+    size = "small",
+    srcs = ["test_graph_params.cpp"],
     linkopts = LINKOPTS,
     linkstatic = True,
     deps = [

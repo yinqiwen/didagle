@@ -153,7 +153,7 @@ const Params& Params::Get(const ParamsString& name) const {
   if (it != params.end()) {
     return it->second;
   }
-  if (NULL != parent) {
+  if (nullptr != parent) {
     return parent->Get(name);
   }
   static Params default_value(true);

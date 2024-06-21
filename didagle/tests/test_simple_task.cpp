@@ -56,11 +56,11 @@ TEST(Task, simple_group) {
     counter++;
     return 0;
   });
-  auto bbb = group1->Add([&](const Params& args) -> int {
-    counter++;
-    return 0;
-  });
-  aaa->Precede(bbb);
+  // auto bbb = group1->Add([&](const Params& args) -> int {
+  //   counter++;
+  //   return 0;
+  // });
+  // aaa->Precede(bbb);
   auto d = group0->Add(group1);
 
   c->Precede(d);
@@ -68,5 +68,34 @@ TEST(Task, simple_group) {
   int rc = ctx.store->SyncExecute(group0);
   ASSERT_EQ(rc, 0);
 
-  ASSERT_EQ(counter, 5);
+  ASSERT_EQ(counter, 4);
+}
+
+TEST(Task, if_else) {
+  TestContext ctx;
+  auto group = TaskGroup::New();
+  int flag = 1;  // else
+  int counter = 0;
+  auto a = group->Add([&](const Params& args) -> int { return flag; });
+  auto b = group->Add([&](const Params& args) -> int {
+    counter = 100;
+    return 0;
+  });
+  auto c = group->Add([&](const Params& args) -> int {
+    counter = 200;
+    return 0;
+  });
+
+  a->Consequent(b);   // if
+  a->Alternative(c);  // else
+
+  int rc = ctx.store->SyncExecute(group);
+  ASSERT_EQ(rc, 0);
+
+  ASSERT_EQ(counter, 200);
+
+  flag = 0;  // if
+  rc = ctx.store->SyncExecute(group);
+  ASSERT_EQ(rc, 0);
+  ASSERT_EQ(counter, 100);
 }

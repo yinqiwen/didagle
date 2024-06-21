@@ -98,10 +98,11 @@ int main(int argc, char** argv) {
       std::unique_ptr<std::string> uuu(new std::string("hello, unique!"));
       root->Set("ustr", &uuu);
     }
+    auto params_ptr = Params::New(std::move(paras));
     int test_count = 100;
     for (int i = 0; i < test_count; i++) {
       folly::Latch latch(1);
-      graphs.Execute(root, cluster_name, graph, &paras, [&](int c) {
+      graphs.Execute(root, cluster_name, graph, params_ptr, [&](int c) {
         DIDAGLE_ERROR("Graph done with {}", c);
         latch.count_down();
       });

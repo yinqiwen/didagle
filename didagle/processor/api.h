@@ -99,7 +99,7 @@ struct GraphDataGetOptions {
 class GraphDataContext;
 using GraphDataContextPtr = std::shared_ptr<GraphDataContext>;
 using DoneClosure = std::function<void(int)>;
-using GraphExecFunc = std::function<int(GraphDataContextPtr, const std::string &, const std::string &, const Params *,
+using GraphExecFunc = std::function<int(GraphDataContextPtr, const std::string &, const std::string &, ParamsPtr,
                                         DoneClosure &&done, uint64_t)>;
 class GraphDataContext {
  public:
@@ -107,6 +107,7 @@ class GraphDataContext {
 
  private:
   GraphDataContext() = default;
+
   using DataValuePtr = std::unique_ptr<DataValue>;
   using DataTable = folly::F14FastMap<DIObjectKeyView, DataValuePtr, DIObjectKeyViewHash, DIObjectKeyViewEqual>;
   using DataArray = folly::fbvector<DataValue *>;
@@ -118,6 +119,10 @@ class GraphDataContext {
   google::protobuf::Arena *arena_ = nullptr;
   std::unique_ptr<google::protobuf::Arena> own_arena_;
   bool _disable_entry_creation = false;
+
+  DoneClosure release_closure_;
+  void *user_ctx_ = nullptr;
+  std::function<void(void *)> user_ctx_destroy_;
 
   DataValue *GetValue(const DIObjectKeyView &key, GraphDataGetOptions opt = {},
                       ExcludeGraphDataContextSet *excludes = nullptr);
@@ -152,10 +157,12 @@ class GraphDataContext {
     GraphDataContextPtr p(new GraphDataContext);
     return p;
   }
+  ~GraphDataContext();
   void SetParent(const GraphDataContext *p) { _parent = p; }
   const GraphDataContext *GetParent() { return _parent; }
   void ReserveChildCapacity(size_t n);
   void SetChild(const GraphDataContext *c, size_t idx);
+  void SetReleaseClosure(DoneClosure &&f) { release_closure_ = std::move(f); }
 
   uint32_t RegisterData(const DIObjectKey &id);
   int Move(const DIObjectKey &from, const DIObjectKey &to);
@@ -176,8 +183,32 @@ class GraphDataContext {
   void SetArena(google::protobuf::Arena *arena);
   void SetArena(std::unique_ptr<google::protobuf::Arena> &&arena);
   google::protobuf::Arena *GetArena() const;
-
   void Reset();
+
+  template <typename T, typename... Args>
+  T *NewUserContext(Args &&...args) {
+    if (nullptr != user_ctx_) {
+      return nullptr;
+    }
+    T *user_ctx = new T(std::move(args)...);
+    user_ctx_ = user_ctx;
+    user_ctx_destroy_ = [](void *p) {
+      T *ctx = reinterpret_cast<T *>(p);
+      delete ctx;
+    };
+    return user_ctx;
+  }
+  template <typename T>
+  T *GetUserContext() {
+    if (nullptr != user_ctx_) {
+      return reinterpret_cast<T *>(user_ctx_);
+    }
+    if (nullptr != _parent) {
+      return _parent->GetUserContext<T>();
+    }
+    return nullptr;
+  }
+
   template <typename T>
   inline typename DIObjectTypeHelper<T>::read_type Get(const std::string_view &name, int32_t idx = -1,
                                                        GraphDataGetOptions opt = {},
@@ -631,8 +662,9 @@ struct ProcessorRegister {
   didagle::ParamsString PARAMS_##name = val;                                                            \
   size_t __PARAMS_##name##_code =                                                                       \
       RegisterParam(BOOST_PP_STRINGIZE(name), "string", val, txt, [this](const didagle::Params &args) { \
-        if (args[BOOST_PP_STRINGIZE(name)].IsString()) {                                                \
-          PARAMS_##name = args[BOOST_PP_STRINGIZE(name)].String();                                      \
+        const auto &arg = args[BOOST_PP_STRINGIZE(name)];                                               \
+        if (arg.IsString()) {                                                                           \
+          PARAMS_##name = arg.String();                                                                 \
         }                                                                                               \
       });                                                                                               \
   size_t __reset_PARAMS_##name##_code = AddResetFunc([this]() { PARAMS_##name = val; });
@@ -655,8 +687,9 @@ struct ProcessorRegister {
   int64_t PARAMS_##name = val;                                                                             \
   size_t __PARAMS_##name##_code = RegisterParam(                                                           \
       BOOST_PP_STRINGIZE(name), "int", BOOST_PP_STRINGIZE(val), txt, [this](const didagle::Params &args) { \
-        if (args[BOOST_PP_STRINGIZE(name)].IsInt()) {                                                      \
-          PARAMS_##name = args[BOOST_PP_STRINGIZE(name)].Int();                                            \
+        const auto &arg = args[BOOST_PP_STRINGIZE(name)];                                                  \
+        if (arg.IsInt()) {                                                                                 \
+          PARAMS_##name = arg.Int();                                                                       \
         }                                                                                                  \
       });                                                                                                  \
   size_t __reset_PARAMS_##name##_code = AddResetFunc([this]() { PARAMS_##name = val; });
@@ -679,8 +712,9 @@ struct ProcessorRegister {
   bool PARAMS_##name = val;                                                                                 \
   size_t __PARAMS_##name##_code = RegisterParam(                                                            \
       BOOST_PP_STRINGIZE(name), "bool", BOOST_PP_STRINGIZE(val), txt, [this](const didagle::Params &args) { \
-        if (args[BOOST_PP_STRINGIZE(name)].IsBool()) {                                                      \
-          PARAMS_##name = args[BOOST_PP_STRINGIZE(name)].Bool();                                            \
+        const auto &arg = args[BOOST_PP_STRINGIZE(name)];                                                   \
+        if (arg.IsBool()) {                                                                                 \
+          PARAMS_##name = arg.Bool();                                                                       \
         }                                                                                                   \
       });                                                                                                   \
   size_t __reset_PARAMS_##name##_code = AddResetFunc([this]() { PARAMS_##name = val; });
@@ -703,8 +737,9 @@ struct ProcessorRegister {
   double PARAMS_##name = val;                                                                                 \
   size_t __PARAMS_##name##_code = RegisterParam(                                                              \
       BOOST_PP_STRINGIZE(name), "double", BOOST_PP_STRINGIZE(val), txt, [this](const didagle::Params &args) { \
-        if (args[BOOST_PP_STRINGIZE(name)].IsDouble()) {                                                      \
-          PARAMS_##name = args[BOOST_PP_STRINGIZE(name)].Double();                                            \
+        const auto &arg = args[BOOST_PP_STRINGIZE(name)];                                                     \
+        if (arg.IsDouble()) {                                                                                 \
+          PARAMS_##name = arg.Double();                                                                       \
         }                                                                                                     \
       });                                                                                                     \
   size_t __reset_PARAMS_##name##_code = AddResetFunc([this]() { PARAMS_##name = val; });

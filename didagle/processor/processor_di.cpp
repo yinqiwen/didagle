@@ -38,6 +38,7 @@ int ProcessorDI::SetupInputOutputIds(const std::vector<FieldInfo>& fields, const
     FieldInfo new_key = exist_key;
     new_key.name = data.id;
     found->info = new_key;
+    found->data = &data;
     // ids[data.field] = std::make_pair(new_key, &data);
   }
   return 0;
@@ -59,6 +60,7 @@ int ProcessorDI::InjectInputs(GraphDataContext& ctx, const Params* params) {
     if (nullptr != graph_data) {
       required = graph_data->required;
     }
+
     int rc = 0;
     if (nullptr != graph_data && !graph_data->aggregate.empty()) {
       for (const std::string& aggregate_id : graph_data->aggregate) {
@@ -82,6 +84,7 @@ int ProcessorDI::InjectInputs(GraphDataContext& ctx, const Params* params) {
         // rc = _proc->InjectInputField(ctx, field, aggregate_id, graph_data->move);
         rc = entry.info.inject(ctx, entry.idx, aggregate_id, graph_data->move);
         if (0 != rc && required) {
+          DIDAGLE_ERROR("[{}]inject {} failed with var data name:{}/{}", _proc->Name(), field, aggregate_id, entry.idx);
           break;
         }
       }

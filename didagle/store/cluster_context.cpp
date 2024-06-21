@@ -20,6 +20,7 @@ GraphContext* GraphClusterContext::GetRunGraph(const std::string& name) {
     _last_runnin_graph = _running_graph;
   }
   _running_graph->SetGraphDataContext(_extern_data_ctx);
+  _extern_data_ctx->SetChild(_running_graph->GetGraphDataContext(), 0);
   return _running_graph;
 }
 void GraphClusterContext::Reset() {

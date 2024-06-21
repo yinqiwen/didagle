@@ -34,15 +34,17 @@
 #include <string>
 #include <vector>
 #include "folly/FBString.h"
+#include "folly/FBVector.h"
 #include "folly/container/F14Map.h"
 #include "kcfg_toml.h"
 
 namespace didagle {
 typedef folly::fbstring ParamsString;
+class Params;
+using ParamsPtr = std::shared_ptr<Params>;
 class Params {
  public:
-  // typedef std::map<ParamsString, Params> ParamValueTable;
-  typedef folly::F14NodeMap<ParamsString, Params> ParamValueTable;
+  using ParamValueTable = folly::F14NodeMap<ParamsString, Params>;
 
  protected:
   enum ParamValueType {
@@ -61,7 +63,7 @@ class Params {
   bool bv;
   bool invalid;
 
-  typedef std::vector<Params> ParamValueArray;
+  using ParamValueArray = std::vector<Params>;
   ParamValueTable params;
   ParamValueArray param_array;
 
@@ -69,6 +71,8 @@ class Params {
 
  public:
   explicit Params(bool invalid_ = false);
+  static ParamsPtr New() { return std::make_shared<Params>(); }
+  static ParamsPtr New(Params&& params) { return std::make_shared<Params>(std::move(params)); }
   void SetParent(const Params* p);
   bool Valid() const;
   bool IsBool() const;
@@ -106,7 +110,6 @@ class Params {
   void ParseFromString(const std::string& v);
   const Params& GetVar(const ParamsString& name) const;
 };
-using ParamsPtr = std::shared_ptr<Params>;
 
 struct GraphData {
   std::string id;

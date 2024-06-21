@@ -54,6 +54,29 @@ GraphStore::GraphStore(const GraphExecuteOptions& options) {
       std::bind(&GraphStore::Execute, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
 }
+
+std::shared_ptr<GraphClusterHandle> GraphStore::LoadString(const std::string& content) {
+  std::shared_ptr<GraphClusterHandle> g = std::make_shared<GraphClusterHandle>();
+  bool v = kcfg::ParseFromTomlString(content, g->cluster);
+  if (!v) {
+    DIDAGLE_ERROR("Failed to parse didagle toml string:{}", content);
+    return nullptr;
+  }
+  if (g->cluster.name.empty()) {
+    DIDAGLE_ERROR("Missing 'name' in toml script", content);
+    return nullptr;
+  }
+  g->cluster._name = g->cluster.name;
+  if (0 != g->Build(this, _exec_options)) {
+    return nullptr;
+  }
+  {
+    std::lock_guard<std::mutex> guard(_graphs_mutex);
+    _graphs[std::move(g->cluster.name)].store(g);
+  }
+
+  return g;
+}
 std::shared_ptr<GraphClusterHandle> GraphStore::Load(const std::string& file) {
   std::shared_ptr<GraphClusterHandle> g = std::make_shared<GraphClusterHandle>();
   bool v = kcfg::ParseFromTomlFile(file, g->cluster);
@@ -149,7 +172,7 @@ bool GraphStore::Exists(const std::string& cluster, const std::string& graph) {
 }
 
 int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster, const std::string& graph,
-                        const Params* params, DoneClosure&& done, uint64_t time_out_ms) {
+                        ParamsPtr params, DoneClosure&& done, uint64_t time_out_ms) {
   if (!_exec_options->async_executor) {
     DIDAGLE_ERROR("Empty async_executor ");
     done(-1);
@@ -160,6 +183,7 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
     done(-1);
     return -1;
   }
+  data_ctx->ReserveChildCapacity(1);
   GraphClusterContext* ctx = GetGraphClusterContext(cluster);
   if (!ctx) {
     DIDAGLE_ERROR("Find graph cluster {} failed.", cluster);
@@ -167,14 +191,14 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
     return -1;
   }
   ctx->SetExternGraphDataContext(data_ctx.get());
-  ctx->SetExecuteParams(params);
+  ctx->SetExecuteParams(params.get());
   if (time_out_ms != 0) {
     ctx->SetEndTime(ustime() + time_out_ms * 1000);
   }
-  auto graph_done = [this, data_ctx, ctx, done](int code) mutable {
+  auto graph_done = [this, params, data_ctx, ctx, done](int code) mutable {
     done(code);
-    data_ctx.reset();
-    AsyncResetWorker::GetInstance()->Post([this, ctx]() mutable {
+    params.reset();
+    auto release_func = [this, ctx]() mutable {
       uint64_t start_exec_ustime = ustime();
       {
         std::shared_ptr<GraphClusterHandle> runing_cluster = ctx->GetRunningCluster();
@@ -187,10 +211,51 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
         event.phase = PhaseType::DAG_PHASE_GRAPH_ASYNC_RESET;
         _exec_options->event_reporter(std::move(event));
       }
-    });
+    };
+    auto release_closure = [release_func](int) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
+    data_ctx->SetReleaseClosure(std::move(release_closure));
+    // AsyncResetWorker::GetInstance()->Post([this, ctx]() mutable {
+    //   uint64_t start_exec_ustime = ustime();
+    //   {
+    //     std::shared_ptr<GraphClusterHandle> runing_cluster = ctx->GetRunningCluster();
+    //     runing_cluster->ReleaseContext(ctx);
+    //   }
+    //   if (_exec_options->event_reporter) {
+    //     DAGEvent event;
+    //     event.start_ustime = start_exec_ustime;
+    //     event.end_ustime = ustime();
+    //     event.phase = PhaseType::DAG_PHASE_GRAPH_ASYNC_RESET;
+    //     _exec_options->event_reporter(std::move(event));
+    //   }
+    // });
   };
   GraphContext* graph_ctx = nullptr;
-  return ctx->Execute(graph, graph_done, graph_ctx);
+  int rc = ctx->Execute(graph, graph_done, graph_ctx);
+  if (nullptr != graph_ctx) {
+    data_ctx->SetChild(graph_ctx->GetGraphDataContext(), 0);
+  }
+  return rc;
+}
+int GraphStore::SyncExecute(GraphDataContextPtr data_ctx, const std::string& cluster, const std::string& graph,
+                            ParamsPtr params, uint64_t time_out_ms) {
+  if (!_exec_options->latch_creator) {
+    DIDAGLE_ERROR("Empty 'latch_creator'");
+    return -1;
+  }
+  auto latch = _exec_options->latch_creator(1);
+  int code = 0;
+  int rc = Execute(
+      data_ctx, cluster, graph, params,
+      [&](int rc) {
+        code = rc;
+        latch->CountDown();
+      },
+      time_out_ms);
+  latch->Wait();
+  if (0 != rc) {
+    return rc;
+  }
+  return code;
 }
 
 int GraphStore::AsyncExecute(TaskGroupPtr graph, DoneClosure&& done, uint64_t time_out_ms) {

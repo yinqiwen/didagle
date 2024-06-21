@@ -8,22 +8,23 @@
 using namespace didagle;
 
 GRAPH_OP_BEGIN(test0)
-// GRAPH_OP_EXTERN_INPUT(int, i0)
-GRAPH_OP_OUTPUT(std::string, test0)
+GRAPH_OP_OUTPUT(std::string, test0_a)
+GRAPH_OP_OUTPUT(int, test0_b)
 int OnSetup(const Params& args) override { return 0; }
 int OnExecute(const Params& args) override {
-  test0 = "test0";
+  test0_a = "test0";
+  test0_b = 101;
   return 0;
 }
 GRAPH_OP_END
 
 GRAPH_OP_BEGIN(test1)
-GRAPH_OP_INPUT(std::string, test0)
+GRAPH_OP_INPUT(std::string, test0_a)
 GRAPH_OP_OUTPUT(std::string, test1)
 int OnSetup(const Params& args) override { return 0; }
 int OnExecute(const Params& args) override {
-  if (nullptr != test0) {
-    test1.append(*test0);
+  if (nullptr != test0_a) {
+    test1.append(*test0_a);
   }
   test1.append("#").append("test1");
   return 0;
@@ -65,7 +66,6 @@ int OnExecute(const Params& args) override {
     test4.append(*test3);
   }
   test4.append("#").append("test4");
-  // fmt::print("{}\n", test4);
   return 0;
 }
 GRAPH_OP_END

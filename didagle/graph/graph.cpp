@@ -13,14 +13,6 @@
 #include "didagle/log/log.h"
 
 namespace didagle {
-static inline uint64_t ustime() {
-  struct timeval tv;
-  uint64_t ust;
-  gettimeofday(&tv, nullptr);
-  ust = ((uint64_t)tv.tv_sec) * 1000000;
-  ust += tv.tv_usec;
-  return ust;
-}
 
 std::string Graph::generateNodeId() {
   std::string id = name + "_" + std::to_string(_idx);
@@ -42,7 +34,6 @@ Vertex* Graph::geneatedCondVertex(const std::string& cond) {
 Vertex* Graph::FindVertexByData(const std::string& data) {
   auto found = _data_mapping_table.find(data);
   if (found == _data_mapping_table.end()) {
-    // DIDAGLE_ERROR("No dep input id:{}", data);
     return nullptr;
   }
   return found->second;
@@ -67,6 +58,9 @@ bool Graph::TestCircle() {
 }
 int Graph::Build() {
   VertexTable generated_cond_nodes;
+  if (vertex.size() == 1) {
+    vertex[0].is_start = true;
+  }
   for (auto& n : vertex) {
     if (n.processor.empty() && !n.cond.empty()) {
       // use default expr processor

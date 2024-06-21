@@ -65,7 +65,7 @@ int GraphContext::Setup(GraphClusterContext* c, Graph* g) {
             return -1;
           }
         }
-        if (!entry.info.flags.is_extern) {
+        if (!entry.info.flags.is_extern && !entry.info.flags.is_aggregate) {
           entry.idx = static_cast<int32_t>(_data_ctx->RegisterData(key));
         }
       }

@@ -221,6 +221,10 @@ void Vertex::MergeSuccessor() {
 }
 bool Vertex::IsCondVertex() const { return !cond.empty(); }
 int Vertex::Build() {
+  if (processor.empty() && (graph.empty())) {
+    DIDAGLE_ERROR("'processor'& 'graph' is empty in {}", GetDotLable());
+    return -1;
+  }
   for (auto& select : select_args) {
     if (select.IsCondExpr()) {
       continue;
@@ -252,7 +256,8 @@ int Vertex::Build() {
     if (data.aggregate.empty()) {
       Vertex* dep_vertex = _graph->FindVertexByData(data.id);
       if (nullptr == dep_vertex && !data.is_extern) {
-        DIDAGLE_ERROR("[{}]No dep input id:{}", GetDotLable(), data.id);
+        DIDAGLE_ERROR("[{}]Can NOT find non extern input data in current graph:{} by id:{}", GetDotLable(),
+                      _graph->name, data.id);
         return -1;
       }
       if (nullptr == dep_vertex) {
@@ -269,7 +274,8 @@ int Vertex::Build() {
       for (const std::string& aggregate_id : data.aggregate) {
         Vertex* dep_vertex = _graph->FindVertexByData(aggregate_id);
         if (nullptr == dep_vertex && !data.is_extern) {
-          DIDAGLE_ERROR("No dep input id:{}", aggregate_id);
+          DIDAGLE_ERROR("[{}]Can NOT find non extern input data in current graph:{} by id:{}", GetDotId(), _graph->name,
+                        aggregate_id);
           return -1;
         }
         if (nullptr == dep_vertex) {

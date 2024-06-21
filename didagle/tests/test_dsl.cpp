@@ -119,12 +119,13 @@ int main(int argc, char** argv) {
     int64_t prpare_run_us = 0;
     int64_t post_run_us = 0;
     int64_t graph_prepare_run_us = 0;
+    auto params_ptr = Params::New(std::move(paras));
     fmt::print("##Start run graph!\n");
     for (int i = 0; i < FLAGS_test_count; i++) {
       root->EnableEventTracker();
       folly::Latch latch(1);
       int64_t exec_start_us = gettimeofday_us();
-      graphs.Execute(root, cluster_name, graph, &paras, [&, root, exec_start_us](int c) {
+      graphs.Execute(root, cluster_name, graph, params_ptr, [&, root, exec_start_us](int c) {
         // DIDAGLE_ERROR("Graph done with {}", c);
         graph_run_us += (gettimeofday_us() - exec_start_us);
 

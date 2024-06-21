@@ -11,6 +11,6 @@ cc_library(
         "log.h",
     ],
     deps = [
-        "@com_github_spdlog//:spdlog",
+        "@spdlog",
     ],
 )
