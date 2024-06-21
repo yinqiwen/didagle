@@ -106,7 +106,7 @@ class GraphDataContext {
   using ExcludeGraphDataContextSet = folly::F14ValueSet<const GraphDataContext *>;
 
  private:
-  GraphDataContext() = default;
+  GraphDataContext();
 
   using DataValuePtr = std::unique_ptr<DataValue>;
   using DataTable = folly::F14FastMap<DIObjectKeyView, DataValuePtr, DIObjectKeyViewHash, DIObjectKeyViewEqual>;

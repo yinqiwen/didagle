@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "boost/asio/post.hpp"
 #include "boost/asio/thread_pool.hpp"
@@ -22,7 +24,7 @@
 DEFINE_string(script, "", "script name");
 DEFINE_string(graph, "", "graph name");
 DEFINE_int32(test_count, 100, "test count");
-
+DEFINE_int32(concurrent, 4, "concurrent test worker");
 static int64_t gettimeofday_us() {
   struct timeval tv;
   uint64_t ust;
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
     boost::asio::post(pool, r);
     // r();
   };
-  int64_t proc_run_total_us = 0;
+
   exec_opt.event_reporter = [&](DAGEvent event) {
     // fmt::print("##phase:{}\n", static_cast<int>(event.phase));
     // if (event.phase == PhaseType::DAG_PHASE_UNKNOWN) {
@@ -92,88 +94,82 @@ int main(int argc, char** argv) {
     paras["expid"].SetInt(1000);
     paras["EXP"]["field1"].SetInt(1221);
 
-    auto root = GraphDataContext::New();
-
-    // set extern data value for dsl
-    int v = 101;
-    root->Set("v0", &v);
-
-    std::string vx = "hello";
-    root->Set("vx", &vx);
-
-    std::string r99 = "hello";
-    std::string r100 = "world";
-    const std::string* r99_ptr = &r99;
-    std::string* r100_ptr = &r100;
-    root->Set("r99", r99_ptr);
-    root->Set("r100", r100_ptr);
-    std::shared_ptr<std::string> sss(new std::string("hello, shread!"));
-    root->Set("tstr", &sss);
-    {
-      std::unique_ptr<std::string> uuu(new std::string("hello, unique!"));
-      root->Set("ustr", &uuu);
-    }
-
-    int64_t graph_run_us = 0;
-    int64_t framework_run_us = 0;
-    int64_t prpare_run_us = 0;
-    int64_t post_run_us = 0;
-    int64_t graph_prepare_run_us = 0;
     auto params_ptr = Params::New(std::move(paras));
-    fmt::print("##Start run graph!\n");
-    for (int i = 0; i < FLAGS_test_count; i++) {
-      root->EnableEventTracker();
-      folly::Latch latch(1);
-      int64_t exec_start_us = gettimeofday_us();
-      graphs.Execute(root, cluster_name, graph, params_ptr, [&, root, exec_start_us](int c) {
-        // DIDAGLE_ERROR("Graph done with {}", c);
-        graph_run_us += (gettimeofday_us() - exec_start_us);
+    // fmt::print("##Start run graph!\n");
 
-        auto event_tracker = root->GetEventTracker();
-        event_tracker->Sweep([&](DAGEvent* event) -> EventReportStatus {
-          if (!event->processor.empty()) {
-            proc_run_total_us += (event->end_ustime - event->start_ustime);
-          } else {
-            switch (event->phase) {
-              case didagle::PhaseType::DAG_PHASE_OP_PREPARE_EXECUTE: {
-                framework_run_us += (event->end_ustime - event->start_ustime);
-                prpare_run_us += (event->end_ustime - event->start_ustime);
-                break;
-              }
-              case didagle::PhaseType::DAG_PHASE_OP_POST_EXECUTE: {
-                framework_run_us += (event->end_ustime - event->start_ustime);
-                post_run_us += (event->end_ustime - event->start_ustime);
-                break;
-              }
-              case didagle::PhaseType::DAG_GRAPH_GRAPH_PREPARE_EXECUTE: {
-                framework_run_us += (event->end_ustime - event->start_ustime);
-                graph_prepare_run_us += (event->end_ustime - event->start_ustime);
-                break;
-              }
-              default: {
-                fmt::print("#####{}\n", static_cast<int>(event->phase));
-                break;
+    auto test_func = [&]() {
+      int64_t proc_run_total_us = 0;
+      int64_t graph_run_us = 0;
+      int64_t framework_run_us = 0;
+      int64_t prpare_run_us = 0;
+      int64_t post_run_us = 0;
+      int64_t graph_prepare_run_us = 0;
+      for (int i = 0; i < FLAGS_test_count; i++) {
+        auto root = GraphDataContext::New();
+        root->EnableEventTracker();
+        // fmt::print("0 data_ctx ref {}\n", root.use_count());
+        folly::Latch latch(1);
+        int64_t exec_start_us = gettimeofday_us();
+        graphs.Execute(root, cluster_name, graph, params_ptr, [&, root, exec_start_us](int c) mutable {
+          // DIDAGLE_ERROR("Graph done with {}", c);
+
+          graph_run_us += (gettimeofday_us() - exec_start_us);
+          auto event_tracker = root->GetEventTracker();
+          event_tracker->Sweep([&](DAGEvent* event) -> EventReportStatus {
+            if (!event->processor.empty()) {
+              proc_run_total_us += (event->end_ustime - event->start_ustime);
+            } else {
+              switch (event->phase) {
+                case didagle::PhaseType::DAG_PHASE_OP_PREPARE_EXECUTE: {
+                  framework_run_us += (event->end_ustime - event->start_ustime);
+                  prpare_run_us += (event->end_ustime - event->start_ustime);
+                  break;
+                }
+                case didagle::PhaseType::DAG_PHASE_OP_POST_EXECUTE: {
+                  framework_run_us += (event->end_ustime - event->start_ustime);
+                  post_run_us += (event->end_ustime - event->start_ustime);
+                  break;
+                }
+                case didagle::PhaseType::DAG_GRAPH_GRAPH_PREPARE_EXECUTE: {
+                  framework_run_us += (event->end_ustime - event->start_ustime);
+                  graph_prepare_run_us += (event->end_ustime - event->start_ustime);
+                  break;
+                }
+                default: {
+                  fmt::print("#####{}\n", static_cast<int>(event->phase));
+                  break;
+                }
               }
             }
-          }
-          return EventReportStatus::STATUS_NORMAL;
+
+            return EventReportStatus::STATUS_NORMAL;
+          });
+          root.reset();
+          // fmt::print("x data_ctx ref {}\n", root.use_count());
+          latch.count_down();
         });
+        // fmt::print("x ref {}\n", root.use_count());
+        latch.wait();
+        // fmt::print("y ref {}\n", root.use_count());
+      }
+      fmt::print("graph run cost {}us\n", graph_run_us);
+      fmt::print("proc run cost {}us\n", proc_run_total_us);
+      fmt::print("framework run cost {}us\n", framework_run_us);
+      fmt::print("prepare run cost {}us\n", prpare_run_us);
+      fmt::print("post run cost {}us\n", post_run_us);
+      fmt::print("graph prepare run cost {}us\n", graph_prepare_run_us);
+      fmt::print("gap {}us\n", graph_run_us - proc_run_total_us);
+    };
 
-        root->Reset();
-        latch.count_down();
-      });
-      latch.wait();
+    std::vector<std::thread> workers;
+    for (int i = 0; i < FLAGS_concurrent; i++) {
+      std::thread t(test_func);
+      workers.emplace_back(std::move(t));
     }
-    fmt::print("graph run cost {}us\n", graph_run_us);
-    fmt::print("proc run cost {}us\n", proc_run_total_us);
-    fmt::print("framework run cost {}us\n", framework_run_us);
-    fmt::print("prepare run cost {}us\n", prpare_run_us);
-    fmt::print("post run cost {}us\n", post_run_us);
-    fmt::print("graph prepare run cost {}us\n", graph_prepare_run_us);
-
-    fmt::print("gap {}us\n", graph_run_us - proc_run_total_us);
+    for (auto& t : workers) {
+      t.join();
+    }
   }
   pool.join();
-
   return 0;
 }

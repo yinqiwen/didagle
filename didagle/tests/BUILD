@@ -41,17 +41,6 @@ cc_test(
 )
 
 cc_test(
-    name = "test_proc",
-    size = "small",
-    srcs = ["test_processor.cpp"],
-    linkopts = LINKOPTS,
-    deps = [
-        "//didagle/processor",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "test_simple_task",
     size = "small",
     srcs = ["test_simple_task.cpp"],
@@ -100,11 +89,11 @@ cc_test(
 )
 
 cc_binary(
-    name = "test_proc_bench",
-    srcs = ["test_proc_bench.cpp"],
+    name = "test_graph_bench",
+    srcs = ["test_graph_bench.cpp"],
     linkopts = LINKOPTS,
     deps = [
-        "//didagle/processor",
+        ":test_common",
         "@com_github_google_benchmark//:benchmark",
     ],
 )
@@ -113,10 +102,10 @@ cc_binary(
     name = "test_dsl",
     srcs = [
         "test_dsl.cpp",
-        "test_dsl_processors.cpp",
+        "test_dsl_ops.cpp",
     ],
     linkopts = LINKOPTS,
     deps = [
-        "//didagle/store",
+        "//didagle",
     ],
 )

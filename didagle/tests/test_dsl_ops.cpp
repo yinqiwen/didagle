@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string>
 #include "didagle/processor/api.h"
+
 using namespace didagle;
 
 GRAPH_OP_BEGIN(test0)

@@ -183,6 +183,7 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
     done(-1);
     return -1;
   }
+  // printf("00 data_ctx ref:%d\n", data_ctx.use_count());
   data_ctx->ReserveChildCapacity(1);
   GraphClusterContext* ctx = GetGraphClusterContext(cluster);
   if (!ctx) {
@@ -195,25 +196,28 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
   if (time_out_ms != 0) {
     ctx->SetEndTime(ustime() + time_out_ms * 1000);
   }
-  auto graph_done = [this, params, data_ctx, ctx, done](int code) mutable {
+  auto release_func = [this, ctx]() mutable {
+    uint64_t start_exec_ustime = ustime();
+    {
+      std::shared_ptr<GraphClusterHandle> runing_cluster = ctx->GetRunningCluster();
+      runing_cluster->ReleaseContext(ctx);
+    }
+    if (_exec_options->event_reporter) {
+      DAGEvent event;
+      event.start_ustime = start_exec_ustime;
+      event.end_ustime = ustime();
+      event.phase = PhaseType::DAG_PHASE_GRAPH_ASYNC_RESET;
+      _exec_options->event_reporter(std::move(event));
+    }
+  };
+  auto release_closure = [release_func](int) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
+  data_ctx->SetReleaseClosure(std::move(release_closure));
+
+  auto graph_done = [params, data_ctx, done](int code) mutable {
+    data_ctx.reset();
     done(code);
     params.reset();
-    auto release_func = [this, ctx]() mutable {
-      uint64_t start_exec_ustime = ustime();
-      {
-        std::shared_ptr<GraphClusterHandle> runing_cluster = ctx->GetRunningCluster();
-        runing_cluster->ReleaseContext(ctx);
-      }
-      if (_exec_options->event_reporter) {
-        DAGEvent event;
-        event.start_ustime = start_exec_ustime;
-        event.end_ustime = ustime();
-        event.phase = PhaseType::DAG_PHASE_GRAPH_ASYNC_RESET;
-        _exec_options->event_reporter(std::move(event));
-      }
-    };
-    auto release_closure = [release_func](int) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
-    data_ctx->SetReleaseClosure(std::move(release_closure));
+
     // AsyncResetWorker::GetInstance()->Post([this, ctx]() mutable {
     //   uint64_t start_exec_ustime = ustime();
     //   {
@@ -229,8 +233,10 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
     //   }
     // });
   };
+  // printf("2 data_ctx ref:%d\n", data_ctx.use_count());
   GraphContext* graph_ctx = nullptr;
-  int rc = ctx->Execute(graph, graph_done, graph_ctx);
+  int rc = ctx->Execute(graph, std::move(graph_done), graph_ctx);
+  // printf("3 data_ctx ref:%d\n", data_ctx.use_count());
   if (nullptr != graph_ctx) {
     data_ctx->SetChild(graph_ctx->GetGraphDataContext(), 0);
   }
