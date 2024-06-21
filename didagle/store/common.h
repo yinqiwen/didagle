@@ -69,7 +69,6 @@ struct GraphExecuteOptions {
   LatchCreator latch_creator;
   std::shared_ptr<Params> params;
   EventReporter event_reporter;
-  std::function<bool(const std::string&)> check_version;
 };
 using GraphExecuteOptionsPtr = std::shared_ptr<GraphExecuteOptions>;
 
