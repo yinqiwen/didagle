@@ -12,7 +12,8 @@
 
 DEFINE_int32(miss_expr_param_log_every_n, 1000, "txt");
 
-GRAPH_OP_BEGIN(didagle_expr) std::string _cond;  // NOLINT
+GRAPH_OP_BEGIN(didagle_expr)
+std::string _cond;  // NOLINT
 ssexpr::SpiritExpression _expr;
 
 std::string_view GetString(didagle::Processor::GetStringMode mode) const override { return _cond; }

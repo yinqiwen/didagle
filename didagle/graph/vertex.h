@@ -21,7 +21,8 @@ enum VertexResult {
   V_RESULT_INVALID = 0,
   V_RESULT_OK = 1,
   V_RESULT_ERR = 2,
-  V_RESULT_ALL = 3,
+  V_RESULT_SKIP = 4,
+  V_RESULT_ALL = 7,
 };
 
 enum VertexErrCode {

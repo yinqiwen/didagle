@@ -14,4 +14,5 @@ cc_library(
         "//didagle/processor",
         "@ssexpr//ssexpr",
     ],
+    alwayslink = True,
 )

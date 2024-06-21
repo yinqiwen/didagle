@@ -2,6 +2,7 @@
 // All rights reserved.
 #include "didagle/store/vertex_context.h"
 
+#include "didagle/graph/vertex.h"
 #include "folly/executors/InlineExecutor.h"
 
 #include "didagle/store/cluster_context.h"
@@ -149,7 +150,10 @@ void VertexContext::FinishVertexProcess(int code) {
   }
   auto exec_end_ustime = ustime();
   if (0 != _code) {
-    _result = V_RESULT_ERR;
+    if (0 == _result) {
+      _result = V_RESULT_ERR;
+    }
+
     if (nullptr != _processor_di) {
       _processor_di->MoveDataWhenSkipped(_graph_ctx->GetGraphDataContextRef());
     }
@@ -381,7 +385,12 @@ int VertexContext::Execute() {
 
   if (!match_dep_expected_result || (_graph_ctx->GetGraphClusterContext()->GetEndTime() != 0 &&
                                      ustime() >= _graph_ctx->GetGraphClusterContext()->GetEndTime())) {
-    _result = V_RESULT_ERR;
+    if (_vertex->_graph->vertex_skip_as_error) {
+      _result = V_RESULT_ERR;
+    } else {
+      _result = V_RESULT_SKIP;
+    }
+
     _code = V_CODE_SKIP;
     // no need to exec this
     FinishVertexProcess(_code);

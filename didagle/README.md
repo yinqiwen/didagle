@@ -270,19 +270,19 @@ didagle执行引擎工作时时将隐式、显式两种机制结合在一起工�
 ```cpp
 typedef std::function<void(int)> DoneClosure;
 typedef std::function<void(void)> AnyClosure;
-typedef std::function<void(AnyClosure&&)> ConcurrentExecutor;
+typedef std::function<void(AnyClosure&&)> AsyncExecutor;
 struct GraphExecuteOptions {
-  ConcurrentExecutor concurrent_executor;        //并发执行器
+  AsyncExecutor async_executor;        //并发执行器
   std::shared_ptr<Params> params;                //外部动态参数， 默认空
 };
 
-class GraphManager {
+class GraphStore {
  public:
   int Execute(const GraphExecuteOptions& options, std::shared_ptr<GraphDataContext> data_ctx,
               const std::string& cluster, const std::string& graph, DoneClosure&& done);
 };
 ```
-其中关键的地方在于`ConcurrentExecutor`实现，didagle中没有默认实现； 在实际应用中， 用户可以用线程池、协程来封装实现；    
+其中关键的地方在于`AsyncExecutor`实现，didagle中没有默认实现； 在实际应用中， 用户可以用线程池、协程来封装实现；    
 图的执行规则遵循两组：
 - 顶点
   - 每个顶点有初始化依赖计数， 初始化依赖计数为0的为起始顶点，可以多个

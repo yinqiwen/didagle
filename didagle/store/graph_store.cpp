@@ -130,9 +130,9 @@ Graph GraphStore::BuildGraphByTaskGroup(TaskGroupPtr group) {
     vertex.deps = task->precede_;
     vertex.consequent = task->consequent_;
     vertex.alternative = task->alternative_;
-    if (!vertex.consequent.empty() || !vertex.alternative.empty()) {
-      vertex.ignore_processor_execute_error = false;
-    }
+    // if (!vertex.consequent.empty() || !vertex.alternative.empty()) {
+    //   vertex.ignore_processor_execute_error = false;
+    // }
     group_g.vertex.emplace_back(vertex);
   }
   return group_g;

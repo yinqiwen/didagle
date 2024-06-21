@@ -88,6 +88,19 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "test_graph_expect_config",
+    size = "small",
+    srcs = ["test_graph_expect_config.cpp"],
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    deps = [
+        ":test_common",
+        "//didagle/processor/impl",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_binary(
     name = "test_graph_bench",
     srcs = ["test_graph_bench.cpp"],

@@ -27,6 +27,7 @@ struct GraphCluster;
 struct Graph {
   std::string name;
   std::vector<Vertex> vertex;
+  bool vertex_skip_as_error = true;
   std::string expect_version = "";
   int priority = -1;
 
@@ -37,7 +38,7 @@ struct Graph {
   int64_t _idx = 0;
   GraphCluster* _cluster = nullptr;
 
-  KCFG_TOML_DEFINE_FIELDS(name, vertex, expect_version, priority)
+  KCFG_TOML_DEFINE_FIELDS(name, vertex, expect_version, priority, vertex_skip_as_error)
   std::string generateNodeId();
   Vertex* geneatedCondVertex(const std::string& cond);
   Vertex* FindVertexByData(const std::string& data);

@@ -219,7 +219,7 @@ void Vertex::MergeSuccessor() {
   successor_on_ok.insert(consequent.begin(), consequent.end());
   successor_on_err.insert(alternative.begin(), alternative.end());
 }
-bool Vertex::IsCondVertex() const { return !cond.empty(); }
+bool Vertex::IsCondVertex() const { return !cond.empty() || !consequent.empty() || !alternative.empty(); }
 int Vertex::Build() {
   if (processor.empty() && (graph.empty())) {
     DIDAGLE_ERROR("'processor'& 'graph' is empty in {}", GetDotLable());
