@@ -10,6 +10,9 @@ cc_library(
     hdrs = [
         "background_worker.h",
     ],
+    deps = [
+        "//didagle/log",
+    ],
 )
 
 cc_library(

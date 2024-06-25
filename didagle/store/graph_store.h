@@ -7,11 +7,13 @@
 #include <stdint.h>
 #include <atomic>
 #include <cstdint>
+#include <memory>
 
 #include "folly/concurrency/UnboundedQueue.h"
 #include "folly/container/F14Map.h"
 
 #include "didagle/graph/graph.h"
+#include "didagle/store/background_worker.h"
 #include "didagle/store/cluster_context.h"
 #include "didagle/store/common.h"
 #include "didagle/store/graph_task.h"
@@ -45,6 +47,7 @@ class GraphStore {
   GraphExecuteOptionsPtr _exec_options;
   std::mutex _graphs_mutex;
   GraphExecFunc _graph_exec_func_;
+  std::unique_ptr<AsyncResetWorker> _async_reset_worker;
   std::atomic<uint32_t> running_graphs_{0};
 };
 

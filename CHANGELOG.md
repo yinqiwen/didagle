@@ -1,6 +1,7 @@
 ## v0.1.0 - 2024/06.24
 
 ### Fixes
+- GraphExecutor: wait all running graphs complete in destructor 
 
 ### Features
 - add 'vertex_skip_as_error' option in graph dsl 

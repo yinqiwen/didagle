@@ -69,6 +69,7 @@ struct GraphExecuteOptions {
   LatchCreator latch_creator;
   std::shared_ptr<Params> params;
   EventReporter event_reporter;
+  uint32_t async_reset_worker_num = 2;
 };
 using GraphExecuteOptionsPtr = std::shared_ptr<GraphExecuteOptions>;
 

@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
   // for asynchronous reclamation
   folly::enable_hazptr_thread_pool_executor();
 
-  spdlog::set_level(spdlog::level::err);
+  spdlog::set_level(spdlog::level::warn);
 
   boost::asio::thread_pool pool(8);
   GraphExecuteOptions exec_opt;
@@ -91,6 +91,7 @@ int main(int argc, char** argv) {
     boost::asio::post(pool, r);
     // r();
   };
+  exec_opt.async_reset_worker_num = FLAGS_concurrent;
 
   exec_opt.event_reporter = [&](DAGEvent event) {
     // fmt::print("##phase:{}\n", static_cast<int>(event.phase));

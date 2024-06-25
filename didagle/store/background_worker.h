@@ -39,9 +39,11 @@ class AsyncResetWorker {
   std::function<void(folly::Func&& func)> custom_executor_;
 
  public:
+  static constexpr uint32_t kErrorLogQueueSizeHint = 1024;
+  static constexpr int kErrorLogEveryN = 1000;
   void SetCustomExecutor(std::function<void(folly::Func&&)>&& func);
-  static std::shared_ptr<AsyncResetWorker> GetInstance();
-  AsyncResetWorker();
+  // static std::shared_ptr<AsyncResetWorker> GetInstance();
+  AsyncResetWorker(size_t n);
   void Post(folly::Func&& func);
   ~AsyncResetWorker();
 };
