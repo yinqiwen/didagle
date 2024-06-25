@@ -58,6 +58,7 @@ void AsyncResetWorker::Post(folly::Func&& func) {
 AsyncResetWorker::~AsyncResetWorker() {
   if (executor_ != nullptr) {
     executor_->stop();
+    executor_->join();
     executor_.reset();
   }
 }

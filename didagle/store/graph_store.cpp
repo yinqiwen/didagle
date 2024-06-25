@@ -30,6 +30,7 @@
 */
 #include "didagle/store/graph_store.h"
 #include <fmt/core.h>
+#include <unistd.h>
 #include <functional>
 #include <memory>
 #include "didagle/store/background_worker.h"
@@ -196,6 +197,7 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
   if (time_out_ms != 0) {
     ctx->SetEndTime(ustime() + time_out_ms * 1000);
   }
+  running_graphs_.fetch_add(1);
   auto release_func = [this, ctx]() mutable {
     uint64_t start_exec_ustime = ustime();
     {
@@ -209,6 +211,7 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
       event.phase = PhaseType::DAG_PHASE_GRAPH_ASYNC_RESET;
       _exec_options->event_reporter(std::move(event));
     }
+    running_graphs_.fetch_sub(1);
   };
   auto release_closure = [release_func](int rc) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
   data_ctx->SetReleaseClosure(std::move(release_closure));
@@ -293,6 +296,12 @@ int GraphStore::SyncExecute(TaskGroupPtr graph, uint64_t time_out_ms) {
     return rc;
   }
   return code;
+}
+
+GraphStore::~GraphStore() {
+  while (running_graphs_.load() > 0) {
+    usleep(kWaitRunningGraphCompleteTimeUs);
+  }
 }
 
 }  // namespace didagle

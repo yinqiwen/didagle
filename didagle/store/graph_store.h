@@ -5,6 +5,8 @@
 #pragma once
 
 #include <stdint.h>
+#include <atomic>
+#include <cstdint>
 
 #include "folly/concurrency/UnboundedQueue.h"
 #include "folly/container/F14Map.h"
@@ -19,6 +21,7 @@ namespace didagle {
 class GraphStore {
  public:
   explicit GraphStore(const GraphExecuteOptions& options);
+
   std::shared_ptr<GraphClusterHandle> Load(const std::string& file);
   std::shared_ptr<GraphClusterHandle> LoadString(const std::string& content);
   std::shared_ptr<GraphClusterHandle> FindGraphClusterByName(const std::string& name);
@@ -31,8 +34,10 @@ class GraphStore {
 
   int AsyncExecute(TaskGroupPtr graph, DoneClosure&& done, uint64_t time_out_ms = 0);
   int SyncExecute(TaskGroupPtr graph, uint64_t time_out_ms = 0);
+  ~GraphStore();
 
  private:
+  static constexpr uint32_t kWaitRunningGraphCompleteTimeUs = 1000;
   Graph BuildGraphByTaskGroup(TaskGroupPtr graph);
   std::shared_ptr<GraphClusterHandle> LoadTaskGroup(TaskGroupPtr graph);
   using ClusterGraphTable = folly::F14NodeMap<std::string, folly::atomic_shared_ptr<GraphClusterHandle>>;
@@ -40,6 +45,7 @@ class GraphStore {
   GraphExecuteOptionsPtr _exec_options;
   std::mutex _graphs_mutex;
   GraphExecFunc _graph_exec_func_;
+  std::atomic<uint32_t> running_graphs_{0};
 };
 
 }  // namespace didagle

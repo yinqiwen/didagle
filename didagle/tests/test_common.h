@@ -33,23 +33,31 @@
 #include <memory>
 #include "didagle/didagle.h"
 
-#include "boost/asio/post.hpp"
-#include "boost/asio/thread_pool.hpp"
-
 #include "didagle/store/common.h"
 #include "folly/Singleton.h"
+#include "folly/executors/CPUThreadPoolExecutor.h"
 
 namespace didagle {
 struct TestContext {
-  boost::asio::thread_pool pool;
+  std::unique_ptr<folly::CPUThreadPoolExecutor> executor;
+  // boost::asio::thread_pool pool;
   std::unique_ptr<GraphStore> store;
-  explicit TestContext(size_t n = 4) : pool(n) {
+  explicit TestContext(size_t n = 4) {
     folly::SingletonVault::singleton()->registrationComplete();
+    executor =
+        std::make_unique<folly::CPUThreadPoolExecutor>(n, std::make_shared<folly::NamedThreadFactory>("didagle_test"));
     GraphExecuteOptions exec_opt;
-    exec_opt.async_executor = [this](AnyClosure&& r) { boost::asio::post(pool, r); };
+    exec_opt.async_executor = [this](AnyClosure&& r) {
+      executor->add(std::move(r));
+      // boost::asio::post(pool, r);
+    };
     exec_opt.latch_creator = new_folly_latch;
     store = std::make_unique<GraphStore>(exec_opt);
   }
-  ~TestContext() { pool.join(); }
+  ~TestContext() {
+    executor->stop();
+    executor->join();
+    // pool.join();
+  }
 };
 }  // namespace didagle
