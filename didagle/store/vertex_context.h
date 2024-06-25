@@ -44,7 +44,7 @@ class VertexContext {
   uint64_t _exec_start_ustime = 0;
   size_t _child_idx = (size_t)-1;
   const Params* _exec_params = nullptr;
-  std::string_view _exec_mathced_cond;
+  std::string_view _exec_matched_cond;
   int _exec_rc = INT_MAX;
 
   std::vector<VertexContext*> _successor_ctxs;

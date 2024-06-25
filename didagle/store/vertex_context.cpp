@@ -27,7 +27,7 @@ int VertexContext::Setup(GraphContext* g, Vertex* v) {
   _vertex = v;
   // todo get processor
   if (!_vertex->graph.empty()) {
-    if (!_vertex->while_cluster.empty()) {
+    if (!_vertex->while_cond.empty()) {
       _processor = ProcessorFactory::GetProcessor(std::string(kDefaultWhileOperatorName));
     } else {
       // get subgraph at runtime
@@ -89,8 +89,8 @@ int VertexContext::Setup(GraphContext* g, Vertex* v) {
     if (!_vertex->cond.empty()) {
       _params.SetString(_vertex->cond);
     }
-    if (!_vertex->while_cluster.empty()) {
-      _params[std::string(kExprParamKey)].SetString(_vertex->while_cluster);
+    if (!_vertex->while_cond.empty()) {
+      _params[std::string(kExprParamKey)].SetString(_vertex->while_cond);
       _params[std::string(kWhileExecCluterParamKey)].SetString(_vertex->cluster);
       _params[std::string(kWhileExecGraphParamKey)].SetString(_vertex->graph);
       _params[std::string(kWhileAsyncExecParamKey)].SetBool(_vertex->while_async);
@@ -123,7 +123,7 @@ void VertexContext::Reset() {
   }
   _params.SetParent(nullptr);
   _exec_params = nullptr;
-  _exec_mathced_cond = "";
+  _exec_matched_cond = "";
 }
 
 VertexContext::VertexContext() { _waiting_num = 0; }
@@ -182,7 +182,7 @@ void VertexContext::FinishVertexProcess(int code) {
       event->cluster = _vertex->_graph->_cluster->_name;
       event->full_graph_name = _full_graph_name;
     }
-    event->matched_cond = _exec_mathced_cond;
+    event->matched_cond = _exec_matched_cond;
     event->rc = _exec_rc;
     tracker->Add(std::move(event));
   }
@@ -243,7 +243,7 @@ int VertexContext::ExecuteProcessor() {
   DIDAGLE_DEBUG("Vertex:{} begin execute", _vertex->GetDotLable());
   auto prepare_start_us = ustime();
   _processor->SetDataContext(_graph_ctx->GetGraphDataContext());
-  _exec_params = GetExecParams(&_exec_mathced_cond);
+  _exec_params = GetExecParams(&_exec_matched_cond);
   _processor->Prepare(*_exec_params);
   if (0 != _processor_di->InjectInputs(_graph_ctx->GetGraphDataContextRef(), _exec_params)) {
     DIDAGLE_DEBUG("Vertex:{} inject inputs failed", _vertex->GetDotLable());
@@ -331,7 +331,7 @@ int VertexContext::ExecuteSubGraph() {
     return -1;
   }
   _exec_start_ustime = ustime();
-  _exec_params = GetExecParams(&_exec_mathced_cond);
+  _exec_params = GetExecParams(&_exec_matched_cond);
   _subgraph_cluster->SetExternGraphDataContext(_graph_ctx->GetGraphDataContext());
   _subgraph_cluster->SetExecuteParams(_exec_params);
   // succeed end time

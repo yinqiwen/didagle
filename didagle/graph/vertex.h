@@ -51,7 +51,7 @@ struct Vertex {
   std::string graph;
 
   // while sub graph node
-  std::string while_cluster;
+  std::string while_cond;
   bool while_async = true;
 
   // dependents or successors
@@ -81,7 +81,7 @@ struct Vertex {
                                   {"while_cluster", "while"}, {"while_async", "async"}))
 
   KCFG_TOML_DEFINE_FIELDS(id, processor, args, cond, expect, expect_deps, expect_config, is_start, select_args, cluster,
-                          graph, while_cluster, while_async, successor, successor_on_ok, successor_on_err, consequent,
+                          graph, while_cond, while_async, successor, successor_on_ok, successor_on_err, consequent,
                           alternative, deps, deps_on_ok, deps_on_err, input, output, ignore_processor_execute_error)
   Vertex();
   bool IsCondVertex() const;
