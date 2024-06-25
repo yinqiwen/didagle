@@ -16,10 +16,10 @@
 #include <unordered_set>
 #include <vector>
 
+#include "folly/FBVector.h"
 #include "folly/container/F14Map.h"
 
 #include "didagle/graph/graph.h"
-
 #include "didagle/store/common.h"
 #include "didagle/store/vertex_context.h"
 
@@ -37,7 +37,7 @@ class GraphContext {
   std::vector<uint8_t> _config_setting_result;
   size_t _children_count;
 
-  std::vector<VertexContext*> _start_ctxs;
+  folly::fbvector<VertexContext*> _start_ctxs;
 
  public:
   GraphContext();
@@ -51,7 +51,7 @@ class GraphContext {
 
   int Setup(GraphClusterContext* c, Graph* g);
   void Reset();
-  void ExecuteReadyVertexs(std::vector<VertexContext*>& ready_vertexs);
+  void ExecuteReadyVertexs(folly::fbvector<VertexContext*>& ready_vertexs);
   inline void ExecuteReadyVertex(VertexContext* v) { v->Execute(); }
   int Execute(DoneClosure&& done);
   inline GraphDataContext* GetGraphDataContext() { return _data_ctx.get(); }

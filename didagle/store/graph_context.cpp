@@ -104,7 +104,7 @@ void GraphContext::Reset() {
   }
   _data_ctx->Reset();
 }
-void GraphContext::ExecuteReadyVertexs(std::vector<VertexContext*>& ready_vertexs) {
+void GraphContext::ExecuteReadyVertexs(folly::fbvector<VertexContext*>& ready_vertexs) {
   DIDAGLE_DEBUG("ExecuteReadyVertexs with {} vertexs.", ready_vertexs.size());
   if (ready_vertexs.empty()) {
     return;
@@ -159,7 +159,7 @@ void GraphContext::OnVertexDone(VertexContext* vertex) {
     }
     return;
   }
-  std::vector<VertexContext*> ready_successors;
+  folly::fbvector<VertexContext*> ready_successors;
   size_t successor_num = vertex->_successor_ctxs.size();
   for (size_t i = 0; i < successor_num; i++) {
     VertexContext* successor_ctx = vertex->_successor_ctxs[i];
