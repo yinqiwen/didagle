@@ -19,7 +19,7 @@ class ProcessorDI {
     FieldInfo info;
     const GraphData* data = nullptr;
     int32_t idx = -1;
-    FieldData(const FieldInfo& id) {
+    explicit FieldData(const FieldInfo& id) {
       name = id.name;
       info = id;
     }

@@ -210,7 +210,7 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
       _exec_options->event_reporter(std::move(event));
     }
   };
-  auto release_closure = [release_func](int) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
+  auto release_closure = [release_func](int rc) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
   data_ctx->SetReleaseClosure(std::move(release_closure));
 
   auto graph_done = [params, data_ctx, done](int code) mutable {

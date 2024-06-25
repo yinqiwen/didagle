@@ -464,7 +464,7 @@ class Processor {
     info.id = DIContainer::GetTypeId<T>();
     info.emit = std::move(emit);
     _output_ids.push_back(info);
-    //_field_emit_table.emplace(field, emit);
+    // _field_emit_table.emplace(field, emit);
     return _output_ids.size();
   }
   size_t AddResetFunc(ResetFunc &&f);

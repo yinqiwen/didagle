@@ -64,11 +64,8 @@ struct GraphCluster {
   std::string _name;
   typedef std::map<std::string, Graph*> GraphTable;
   GraphTable _graphs;
-  // GraphManager* _graph_manager = nullptr;
   bool _builded = false;
 
-  // using ContextPool = folly::UMPMCQueue<GraphClusterContext*, false>;
-  // ContextPool _graph_cluster_context_pool;
   KCFG_TOML_DEFINE_FIELDS(name, desc, strict_dsl, default_expr_processor, default_context_pool_size, graph,
                           config_setting)
 
@@ -76,30 +73,8 @@ struct GraphCluster {
   bool ContainsConfigSetting(const std::string& name);
   int DumpDot(std::string& s);
   Graph* FindGraphByName(const std::string& name);
-  // GraphClusterContext* GetContext();
-  // void ReleaseContext(GraphClusterContext* p);
-  // inline const GraphManager* GetGraphManager() const { return _graph_manager; }
   bool Exists(const std::string& graph);
   ~GraphCluster();
 };
 
-// class GraphContext;
-// class GraphManager {
-//  private:
-//   using ClusterGraphTable = folly::F14NodeMap<std::string, folly::atomic_shared_ptr<GraphCluster>>;
-//   ClusterGraphTable _graphs;
-//   GraphExecuteOptions _exec_options;
-//   std::mutex _graphs_mutex;
-
-//  public:
-//   explicit GraphManager(const GraphExecuteOptions& options);
-//   inline const GraphExecuteOptions& GetGraphExecuteOptions() const { return _exec_options; }
-//   std::shared_ptr<GraphCluster> Load(const std::string& file);
-//   std::shared_ptr<GraphCluster> FindGraphClusterByName(const std::string& name);
-//   GraphClusterContext* GetGraphClusterContext(const std::string& cluster);
-//   int Execute(GraphDataContextPtr& data_ctx, const std::string& cluster, const std::string& graph, const Params*
-//   params,
-//               DoneClosure&& done, uint64_t = 0);
-//   bool Exists(const std::string& cluster, const std::string& graph);
-// };
 }  // namespace didagle

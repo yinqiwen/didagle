@@ -50,7 +50,7 @@ google::protobuf::Arena *GraphDataContext::GetArena() const {
 }
 
 void GraphDataContext::Reset() {
-  //_data_table.clear();
+  // _data_table.clear();
   for (auto data : _data_array) {
     data->Reset();
   }
@@ -66,9 +66,7 @@ void GraphDataContext::Reset() {
     user_ctx_ = nullptr;
   }
 }
-GraphDataContext::GraphDataContext() {
-  // printf("####init GraphDataContext\n");
-}
+GraphDataContext::GraphDataContext() {}
 GraphDataContext::~GraphDataContext() {
   if (release_closure_) {
     release_closure_(0);
@@ -76,7 +74,6 @@ GraphDataContext::~GraphDataContext() {
   if (nullptr != user_ctx_ && user_ctx_destroy_) {
     user_ctx_destroy_(user_ctx_);
   }
-  // printf("####~GraphDataContext\n");
 }
 
 DataValue *GraphDataContext::GetValue(const DIObjectKeyView &key, GraphDataGetOptions opt,

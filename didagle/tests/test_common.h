@@ -43,7 +43,7 @@ namespace didagle {
 struct TestContext {
   boost::asio::thread_pool pool;
   std::unique_ptr<GraphStore> store;
-  TestContext(size_t n = 4) : pool(n) {
+  explicit TestContext(size_t n = 4) : pool(n) {
     folly::SingletonVault::singleton()->registrationComplete();
     GraphExecuteOptions exec_opt;
     exec_opt.async_executor = [this](AnyClosure&& r) { boost::asio::post(pool, r); };

@@ -53,7 +53,7 @@ struct Latch {
 };
 
 struct FollyLatch : public Latch {
-  FollyLatch(ptrdiff_t expected) { l = std::make_unique<folly::Latch>(expected); }
+  explicit FollyLatch(ptrdiff_t expected) { l = std::make_unique<folly::Latch>(expected); }
   void CountDown(ptrdiff_t n) override { l->count_down(n); }
   void Wait() noexcept override { l->wait(); }
   std::unique_ptr<folly::Latch> l;
