@@ -170,7 +170,7 @@ void GraphContext::OnVertexDone(VertexContext* vertex) {
       ExecuteReadyVertexs(_start_ctxs);
     } else {
       if (_done) {
-        _done(0);
+        _done(early_exist_rc_);
       }
     }
     return;

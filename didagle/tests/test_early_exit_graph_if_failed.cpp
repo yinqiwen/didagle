@@ -42,7 +42,7 @@ int OnExecute(const Params& args) override {
   } else {
     test2 = -1;
   }
-  return 0;
+  return -1000;
 }
 GRAPH_OP_END
 
@@ -83,6 +83,7 @@ processor = "test0"
 processor = "test1"
 [[graph.vertex]]
 processor = "test2"
+early_exit_graph_if_failed=true
 [[graph.vertex]]
 processor = "test3"
   )";
@@ -91,17 +92,5 @@ processor = "test3"
   ASSERT_TRUE(handle != nullptr);
   auto data_ctx = GraphDataContext::New();
   int rc = ctx.store->SyncExecute(data_ctx, "test", "test");
-  ASSERT_EQ(rc, 0);
-
-  auto test0_b = data_ctx->Get<int>("test0_b");
-  ASSERT_TRUE(test0_b != nullptr);
-  ASSERT_EQ(*test0_b, 101);
-
-  auto test3_b = data_ctx->Get<int>("test3_b");
-  ASSERT_TRUE(test3_b != nullptr);
-  ASSERT_EQ(*test3_b, 301);
-
-  auto test3_a = data_ctx->Get<std::string>("test3_a");
-  ASSERT_TRUE(test3_a != nullptr);
-  ASSERT_EQ(*test3_a, "test0#test1#test3");
+  ASSERT_EQ(rc, -1000);
 }
