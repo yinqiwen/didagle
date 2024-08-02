@@ -227,6 +227,11 @@ size_t Processor::AddPrepareFunc(PrepareFunc &&f) {
   return _prepare_funcs.size();
 }
 
+// std::optional<Params> Processor::GetProcessorDataValue(const std::string &name) {
+//   std::optional<Params> params;
+//   return params;
+// }
+
 bool ProcessorFactory::Register(std::string_view name, const ProcessorCreator &creator) {
   std::string name_str(name.data(), name.size());
   return GetCreatorTable().emplace(std::make_pair(name_str, creator)).second;

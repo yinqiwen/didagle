@@ -100,13 +100,20 @@ int VertexContext::Setup(GraphContext* g, Vertex* v) {
   return 0;
 }
 
-void VertexContext::Reset() {
+void VertexContext::ResetState() {
   _exec_start_ustime = 0;
   _result = V_RESULT_INVALID;
   _code = V_CODE_INVALID;
   _exec_rc = INT_MAX;
   _deps_results.assign(_vertex->_deps_idx.size(), V_RESULT_INVALID);
   _waiting_num = _vertex->_deps_idx.size();
+  if (nullptr != _subgraph_ctx) {
+    _subgraph_ctx->ResetState();
+  }
+}
+
+void VertexContext::Reset() {
+  ResetState();
   if (nullptr != _processor) {
     _processor->Reset();
   }
@@ -142,7 +149,15 @@ void VertexContext::SetupSuccessors() {
   }
 }
 
-void VertexContext::FinishVertexProcess(int code) {
+void VertexContext::FinishVertexProcess(int code, bool adjust_code) {
+  if (adjust_code) {
+    if (code != 0 && _vertex->early_exit_graph_if_failed) {
+      _graph_ctx->SetEarlyExitCode(code);
+    } else {
+      code = _vertex->ignore_processor_execute_error && !_vertex->IsCondVertex() ? 0 : code;
+    }
+  }
+
   _code = (VertexErrCode)code;
   DAGEventTracker* tracker = _graph_ctx->GetGraphDataContextRef().GetEventTracker();
   if (_exec_rc == INT_MAX) {
@@ -247,7 +262,7 @@ int VertexContext::ExecuteProcessor() {
   _processor->Prepare(*_exec_params);
   if (0 != _processor_di->InjectInputs(_graph_ctx->GetGraphDataContextRef(), _exec_params)) {
     DIDAGLE_DEBUG("Vertex:{} inject inputs failed", _vertex->GetDotLable());
-    FinishVertexProcess(V_CODE_SKIP);
+    FinishVertexProcess(V_CODE_SKIP, false);
     return 0;
   }
   auto prepare_end_ustime = ustime();
@@ -265,16 +280,16 @@ int VertexContext::ExecuteProcessor() {
       try {
         _processor->FutureExecute(*_exec_params).thenValue([this](int rc) {
           _exec_rc = rc;
-          FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+          FinishVertexProcess(_exec_rc, true);
         });
       } catch (std::exception& ex) {
         DIDAGLE_ERROR("Vertex:{} execute with caught excetion:{} ", _vertex->GetDotLable(), ex.what());
         _exec_rc = V_CODE_ERR;
-        FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+        FinishVertexProcess(_exec_rc, true);
       } catch (...) {
         DIDAGLE_ERROR("Vertex:{} execute with caught unknown excetion.", _vertex->GetDotLable());
         _exec_rc = V_CODE_ERR;
-        FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+        FinishVertexProcess(_exec_rc, true);
       }
       break;
     }
@@ -283,7 +298,7 @@ int VertexContext::ExecuteProcessor() {
       folly::QueuedImmediateExecutor* ex = &(folly::QueuedImmediateExecutor::instance());
       ispine::coro_spawn(ex, _processor->CoroExecute(*_exec_params)).via(ex).thenValue([this](int rc) {
         _exec_rc = rc;
-        FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+        FinishVertexProcess(_exec_rc, true);
       });
       break;
     }
@@ -293,7 +308,7 @@ int VertexContext::ExecuteProcessor() {
       folly::QueuedImmediateExecutor* ex = &(folly::QueuedImmediateExecutor::instance());
       ispine::coro_spawn(ex, _processor->AExecute(*_exec_params)).via(ex).thenValue([this](int rc) {
         _exec_rc = rc;
-        FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+        FinishVertexProcess(_exec_rc, true);
       });
 #else
       try {
@@ -305,7 +320,7 @@ int VertexContext::ExecuteProcessor() {
         DIDAGLE_ERROR("Vertex:{} execute with caught unknown excetion.", _vertex->GetDotLable());
         _exec_rc = V_CODE_ERR;
       }
-      FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+      FinishVertexProcess(_exec_rc, true);
 #endif
       break;
     }
@@ -319,10 +334,12 @@ int VertexContext::ExecuteProcessor() {
         DIDAGLE_ERROR("Vertex:{} execute with caught unknown excetion.", _vertex->GetDotLable());
         _exec_rc = V_CODE_ERR;
       }
-      FinishVertexProcess((_vertex->ignore_processor_execute_error && !_vertex->IsCondVertex()) ? 0 : _exec_rc);
+
+      FinishVertexProcess(_exec_rc, true);
       break;
     }
   }
+
   return 0;
 }
 int VertexContext::ExecuteSubGraph() {
@@ -332,12 +349,17 @@ int VertexContext::ExecuteSubGraph() {
   }
   _exec_start_ustime = ustime();
   _exec_params = GetExecParams(&_exec_matched_cond);
-  _subgraph_cluster->SetExternGraphDataContext(_graph_ctx->GetGraphDataContext());
-  _subgraph_cluster->SetExecuteParams(_exec_params);
-  // succeed end time
-  _subgraph_cluster->SetEndTime(_graph_ctx->GetGraphClusterContext()->GetEndTime());
-  _subgraph_cluster->Execute(
-      _vertex->graph, [this](int code) { FinishVertexProcess(code); }, _subgraph_ctx);
+  if (nullptr != _subgraph_ctx) {
+    _subgraph_ctx->Execute([this](int code) { FinishVertexProcess(code, true); });
+  } else {
+    _subgraph_cluster->SetExternGraphDataContext(_graph_ctx->GetGraphDataContext());
+    _subgraph_cluster->SetExecuteParams(_exec_params);
+    // succeed end time
+    _subgraph_cluster->SetEndTime(_graph_ctx->GetGraphClusterContext()->GetEndTime());
+    _subgraph_cluster->Execute(
+        _vertex->graph, [this](int code) { FinishVertexProcess(code, true); }, _subgraph_ctx);
+  }
+
   return 0;
 }
 int VertexContext::Execute() {
@@ -383,17 +405,18 @@ int VertexContext::Execute() {
     }
   }
 
-  if (!match_dep_expected_result || (_graph_ctx->GetGraphClusterContext()->GetEndTime() != 0 &&
-                                     ustime() >= _graph_ctx->GetGraphClusterContext()->GetEndTime())) {
+  if (!match_dep_expected_result ||
+      (_graph_ctx->GetGraphClusterContext()->GetEndTime() != 0 &&
+       ustime() >= _graph_ctx->GetGraphClusterContext()->GetEndTime()) ||
+      _graph_ctx->GetEarlyExitCode() != 0) {
     if (_vertex->_graph->vertex_skip_as_error) {
       _result = V_RESULT_ERR;
     } else {
       _result = V_RESULT_SKIP;
     }
-
     _code = V_CODE_SKIP;
     // no need to exec this
-    FinishVertexProcess(_code);
+    FinishVertexProcess(_code, false);
   } else {
     if (nullptr != _processor) {
       ExecuteProcessor();

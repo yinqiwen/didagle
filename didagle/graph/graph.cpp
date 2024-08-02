@@ -5,11 +5,13 @@
 #include <sys/time.h>
 
 #include <iostream>
+#include <memory>
 #include <regex>
 #include <set>
 #include <string>
 #include <utility>
 
+#include "didagle/graph/vertex.h"
 #include "didagle/log/log.h"
 
 namespace didagle {
@@ -20,7 +22,7 @@ std::string Graph::generateNodeId() {
   return id;
 }
 Vertex* Graph::geneatedCondVertex(const std::string& cond) {
-  std::shared_ptr<Vertex> v(new Vertex);
+  auto v = std::make_shared<Vertex>();
   v->SetGeneratedId(generateNodeId());
   v->processor = _cluster->default_expr_processor;
   v->cond = cond;
@@ -246,6 +248,47 @@ int GraphCluster::Build() {
     // already builded
     return 0;
   }
+  // gen while subgraphs
+
+  for (auto& f : graph) {
+    if (!f.gen_while_subgraph) {
+      continue;
+    }
+    int gen_sbugraph_idx = 0;
+    for (auto& v : f.vertex) {
+      if (v.while_cond.empty()) {
+        continue;
+      }
+
+      Graph gen_graph;
+      gen_graph.name = f.name + "_while_" + std::to_string(gen_sbugraph_idx++);
+      Vertex while_cond_vertex;
+      while_cond_vertex.id = "0";
+      if (isCondString(v.while_cond)) {
+        while_cond_vertex.processor = default_expr_processor;
+        while_cond_vertex.cond = v.while_cond;
+      } else {
+        while_cond_vertex.processor = v.while_cond;
+      }
+
+      Vertex while_body_vertex;
+      while_body_vertex.id = "1";
+      while_body_vertex.processor = v.processor;
+      while_body_vertex.cluster = v.cluster;
+      while_body_vertex.graph = v.graph;
+      while_cond_vertex.consequent.insert(while_body_vertex.id);
+      gen_graph.vertex.emplace_back(while_cond_vertex);
+      gen_graph.vertex.emplace_back(while_body_vertex);
+      gen_graph._is_gen_while_graph = true;
+      v.processor = "";
+      v.cluster = _name;
+      v.graph = gen_graph.name;
+      v.while_cond = "";
+
+      graph.emplace_back(std::move(gen_graph));
+    }
+  }
+
   for (auto& f : graph) {
     // if (GetGraphManager()->GetGraphExecuteOptions().check_version &&
     //     !GetGraphManager()->GetGraphExecuteOptions().check_version(f.expect_version)) {

@@ -84,7 +84,9 @@ int GraphContext::Setup(GraphClusterContext* c, Graph* g) {
       _start_ctxs.emplace_back(ctx.get());
     }
   }
-
+  if (g->_is_gen_while_graph) {
+    _while_ctx = _start_ctxs[0];
+  }
   Reset();
   return 0;
 }
@@ -96,6 +98,13 @@ VertexContext* GraphContext::FindVertexContext(Vertex* v) {
   }
   return found->second.get();
 }
+void GraphContext::ResetState() {
+  _join_vertex_num = _vertex_context_table.size();
+  for (auto& pair : _vertex_context_table) {
+    std::shared_ptr<VertexContext>& ctx = pair.second;
+    ctx->ResetState();
+  }
+}
 void GraphContext::Reset() {
   _join_vertex_num = _vertex_context_table.size();
   for (auto& pair : _vertex_context_table) {
@@ -103,6 +112,7 @@ void GraphContext::Reset() {
     ctx->Reset();
   }
   _data_ctx->Reset();
+  early_exist_rc_ = 0;
 }
 void GraphContext::ExecuteReadyVertexs(folly::fbvector<VertexContext*>& ready_vertexs) {
   DIDAGLE_DEBUG("ExecuteReadyVertexs with {} vertexs.", ready_vertexs.size());
@@ -154,8 +164,14 @@ void GraphContext::ExecuteReadyVertexs(folly::fbvector<VertexContext*>& ready_ve
 void GraphContext::OnVertexDone(VertexContext* vertex) {
   DIDAGLE_DEBUG("[{}]OnVertexDone while _join_vertex_num:{}.", vertex->GetVertex()->id, _join_vertex_num.load());
   if (1 == _join_vertex_num.fetch_sub(1)) {  // last vertex
-    if (_done) {
-      _done(0);
+    // printf("%s while %d %d\n", _graph->name.c_str(), nullptr != _while_ctx, _while_ctx->_code);
+    if (nullptr != _while_ctx && _while_ctx->_code == 0) {
+      ResetState();
+      ExecuteReadyVertexs(_start_ctxs);
+    } else {
+      if (_done) {
+        _done(0);
+      }
     }
     return;
   }

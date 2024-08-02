@@ -8,7 +8,6 @@ cc_library(
         "expr.cpp",
         "noop.cpp",
         "switch.cpp",
-        "while.cpp",
     ],
     deps = [
         "//didagle/processor",

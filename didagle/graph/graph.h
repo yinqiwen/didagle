@@ -28,7 +28,7 @@ struct Graph {
   std::string name;
   std::vector<Vertex> vertex;
   bool vertex_skip_as_error = true;
-  // std::string expect_version = "";
+  bool gen_while_subgraph = false;
   int priority = -1;
 
   typedef std::unordered_map<std::string, Vertex*> VertexTable;
@@ -37,8 +37,9 @@ struct Graph {
   VertexTable _data_mapping_table;
   int64_t _idx = 0;
   GraphCluster* _cluster = nullptr;
+  bool _is_gen_while_graph = false;
 
-  KCFG_TOML_DEFINE_FIELDS(name, vertex, priority, vertex_skip_as_error)
+  KCFG_TOML_DEFINE_FIELDS(name, vertex, priority, vertex_skip_as_error, gen_while_subgraph)
   std::string generateNodeId();
   Vertex* geneatedCondVertex(const std::string& cond);
   Vertex* FindVertexByData(const std::string& data);

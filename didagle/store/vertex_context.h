@@ -62,11 +62,10 @@ class VertexContext {
   inline ProcessorDI* GetProcessorDI() { return _processor_di; }
   inline Processor* GetProcessor() { return _processor; }
   inline VertexResult GetResult() { return _result; }
-  void FinishVertexProcess(int code);
+  void FinishVertexProcess(int code, bool adjust_code);
   int ExecuteProcessor();
   int ExecuteSubGraph();
   inline uint32_t SetDependencyResult(int idx, VertexResult r) {
-    // int idx = _vertex->GetDependencyIndex(v);
     VertexResult last_result_val = _deps_results[idx];
     _deps_results[idx] = r;
     if (last_result_val == V_RESULT_INVALID) {
@@ -78,6 +77,7 @@ class VertexContext {
   inline bool Ready() { return 0 == _waiting_num.load(); }
   int Setup(GraphContext* g, Vertex* v);
   void Reset();
+  void ResetState();
   int Execute();
   ~VertexContext();
 };

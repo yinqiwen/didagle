@@ -9,6 +9,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -31,6 +32,7 @@
 #include "folly/futures/Future.h"
 
 #include "didagle/di/container.h"
+#include "didagle/di/dtype.h"
 #include "didagle/di/reset.h"
 #include "didagle/graph/params.h"
 #include "didagle/processor/coroutine.h"
@@ -212,10 +214,15 @@ class GraphDataContext {
   template <typename T>
   inline typename DIObjectTypeHelper<T>::read_type Get(const std::string_view &name, int32_t idx = -1,
                                                        GraphDataGetOptions opt = {},
-                                                       ExcludeGraphDataContextSet *excludes = nullptr) const {
+                                                       ExcludeGraphDataContextSet *excludes = nullptr,
+                                                       bool *exist_entry = nullptr) const {
     using GetValueType = typename DIObjectTypeHelper<T>::read_type;
     uint32_t id = DIContainer::GetTypeId<T>();
     DIObjectKeyView key = {name, id};
+    GetValueType r = {};
+    if (nullptr != exist_entry) {
+      *exist_entry = false;
+    }
     // auto found = _data_table.find(key);
     auto found = GetDataValue(key, idx);
     if (FOLLY_LIKELY(found != nullptr)) {
@@ -236,6 +243,10 @@ class GraphDataContext {
           return *val;
         }
       }
+      if (nullptr != exist_entry) {
+        *exist_entry = true;
+      }
+      return r;
     }
     auto empty_execludes = std::make_unique<ExcludeGraphDataContextSet>();
     ExcludeGraphDataContextSet *new_excludes = excludes;
@@ -243,7 +254,7 @@ class GraphDataContext {
       new_excludes = empty_execludes.get();
     }
     new_excludes->insert(this);
-    GetValueType r = {};
+
     if (opt.with_parent && _parent) {
       GraphDataGetOptions parent_opt;
       parent_opt.with_parent = 1;
@@ -474,6 +485,8 @@ class Processor {
   google::protobuf::Arena *GetArena() { return _data_ctx->GetArena(); }
 
   const std::string &GetID() const { return id_; }
+
+  // std::optional<Params> GetProcessorDataValue(const std::string &name);
 
   virtual int OnSetup(const Params &args) { return 0; }
   virtual int OnPrepare(const Params &args) { return 0; }

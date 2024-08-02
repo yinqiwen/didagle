@@ -39,6 +39,10 @@ class GraphContext {
 
   folly::fbvector<VertexContext*> _start_ctxs;
 
+  VertexContext* _while_ctx = nullptr;
+
+  int early_exist_rc_ = 0;
+
  public:
   GraphContext();
 
@@ -51,12 +55,19 @@ class GraphContext {
 
   int Setup(GraphClusterContext* c, Graph* g);
   void Reset();
+  void ResetState();
   void ExecuteReadyVertexs(folly::fbvector<VertexContext*>& ready_vertexs);
   inline void ExecuteReadyVertex(VertexContext* v) { v->Execute(); }
   int Execute(DoneClosure&& done);
   inline GraphDataContext* GetGraphDataContext() { return _data_ctx.get(); }
   inline GraphDataContext& GetGraphDataContextRef() { return *(GetGraphDataContext()); }
   inline void SetGraphDataContext(GraphDataContext* p) { _data_ctx->SetParent(p); }
+  inline void SetEarlyExitCode(int rc) {
+    if (early_exist_rc_ == 0) {
+      early_exist_rc_ = rc;
+    }
+  }
+  inline int GetEarlyExitCode() { return early_exist_rc_; }
 };
 
 }  // namespace didagle

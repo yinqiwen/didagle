@@ -3,6 +3,13 @@ package(default_visibility = ["//visibility:public"])
 exports_files(["graph_params.h"])
 
 cc_library(
+    name = "dtype",
+    hdrs = [
+        "dtype.h",
+    ],
+)
+
+cc_library(
     name = "container",
     srcs = [
         "container.cpp",

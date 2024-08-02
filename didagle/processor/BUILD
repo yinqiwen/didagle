@@ -16,6 +16,7 @@ cc_library(
     ],
     deps = [
         "//didagle/di:container",
+        "//didagle/di:dtype",
         "//didagle/di:reset",
         "//didagle/graph:params",
         "//didagle/log",

@@ -77,6 +77,19 @@ cc_test(
 )
 
 cc_test(
+    name = "test_graph_while",
+    size = "small",
+    srcs = ["test_graph_while.cpp"],
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    deps = [
+        ":test_common",
+        "//didagle/processor/impl",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "test_graph_params",
     size = "small",
     srcs = ["test_graph_params.cpp"],
@@ -105,6 +118,19 @@ cc_test(
     name = "test_graph_match_params",
     size = "small",
     srcs = ["test_graph_match_params.cpp"],
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    deps = [
+        ":test_common",
+        "//didagle/processor/impl",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_early_exit_graph_if_failed",
+    size = "small",
+    srcs = ["test_early_exit_graph_if_failed.cpp"],
     linkopts = LINKOPTS,
     linkstatic = True,
     deps = [

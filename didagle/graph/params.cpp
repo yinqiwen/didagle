@@ -205,6 +205,11 @@ Params& Params::Put(const ParamsString& name, bool value) {
   params[name].SetBool(value);
   return *this;
 }
+Params& Params::Put(const ParamsString& name, Params&& p) {
+  _param_type = PARAM_OBJECT;
+  params[name] = std::move(p);
+  return *this;
+}
 Params& Params::operator[](size_t idx) {
   if (param_array.size() > idx) {
     return param_array[idx];

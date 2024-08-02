@@ -104,6 +104,7 @@ class Params {
   Params& Put(const ParamsString& name, int64_t value);
   Params& Put(const ParamsString& name, double value);
   Params& Put(const ParamsString& name, bool value);
+  Params& Put(const ParamsString& name, Params&& p);
   bool Contains(const ParamsString& name) const;
   void Insert(const Params& other);
   void BuildFromString(const std::string& v);
@@ -136,20 +137,22 @@ struct GraphParams : public Params {
   bool ParseFromToml(const kcfg::TomlValue& doc);
 };
 
+inline bool isCondString(const std::string& str) {
+  if (str.empty()) return false;
+  for (const auto& ch : str) {
+    if (!isalpha(ch) && !isdigit(ch) && ch != '_') {
+      return true;
+    }
+  }
+  return false;
+}
+
 struct CondParams {
   std::string match;
   GraphParams args;
   KCFG_TOML_DEFINE_FIELDS(match, args)
   // 是否是条件表达式 包含有$符号算条件表达式
-  bool IsCondExpr() const {
-    if (match.empty()) return false;
-    for (const auto& ch : match) {
-      if (!isalpha(ch) && !isdigit(ch) && ch != '_') {
-        return true;
-      }
-    }
-    return false;
-  }
+  bool IsCondExpr() const { return isCondString(match); }
 };
 
 }  // namespace didagle
