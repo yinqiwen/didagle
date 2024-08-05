@@ -151,7 +151,7 @@ void VertexContext::SetupSuccessors() {
 
 void VertexContext::FinishVertexProcess(int code, bool adjust_code) {
   if (adjust_code) {
-    if (code != 0 && _vertex->early_exit_graph_if_failed) {
+    if (code != 0 && (_vertex->early_exit_graph_if_failed || _vertex->_graph->early_exit_graph_if_failed)) {
       _graph_ctx->SetEarlyExitCode(code);
     } else {
       code = _vertex->ignore_processor_execute_error && !_vertex->IsCondVertex() ? 0 : code;
