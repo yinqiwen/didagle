@@ -47,7 +47,7 @@ class GraphStore {
   GraphExecuteOptionsPtr _exec_options;
   std::mutex _graphs_mutex;
   GraphExecFunc _graph_exec_func_;
-  std::unique_ptr<AsyncResetWorker> _async_reset_worker;
+  // std::unique_ptr<AsyncResetWorker> _async_reset_worker;
   std::atomic<uint32_t> running_graphs_{0};
 };
 

@@ -51,7 +51,7 @@ static std::string get_basename(const std::string& filename) {
 
 GraphStore::GraphStore(const GraphExecuteOptions& options) {
   _exec_options = std::make_shared<GraphExecuteOptions>(options);
-  _async_reset_worker = std::make_unique<AsyncResetWorker>(options.async_reset_worker_num);
+  // _async_reset_worker = std::make_unique<AsyncResetWorker>(options.async_reset_worker_num);
   _graph_exec_func_ =
       std::bind(&GraphStore::Execute, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
                 std::placeholders::_4, std::placeholders::_5, std::placeholders::_6);
@@ -214,7 +214,7 @@ int GraphStore::Execute(GraphDataContextPtr data_ctx, const std::string& cluster
     }
     running_graphs_.fetch_sub(1);
   };
-  auto release_closure = [this, release_func](int rc) mutable { _async_reset_worker->Post(release_func); };
+  auto release_closure = [release_func](int rc) mutable { AsyncResetWorker::GetInstance()->Post(release_func); };
   data_ctx->SetReleaseClosure(std::move(release_closure));
 
   auto graph_done = [params, data_ctx, done](int code) mutable {

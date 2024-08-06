@@ -91,7 +91,6 @@ int main(int argc, char** argv) {
     boost::asio::post(pool, r);
     // r();
   };
-  exec_opt.async_reset_worker_num = FLAGS_concurrent;
 
   exec_opt.event_reporter = [&](DAGEvent event) {
     // fmt::print("##phase:{}\n", static_cast<int>(event.phase));

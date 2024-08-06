@@ -28,18 +28,21 @@
  */
 #include "didagle/store/background_worker.h"
 
+#include <gflags/gflags.h>
 #include <utility>
-#include "didagle/log/log.h"
+#include "folly/Singleton.h"
+
+DEFINE_uint32(didagle_async_reset_worker_num, 2, "async reset worker num");
 
 namespace {
 struct PrivateTag {};
 }  // namespace
 namespace didagle {
-// static folly::Singleton<AsyncResetWorker, PrivateTag> the_singleton;
-// std::shared_ptr<AsyncResetWorker> AsyncResetWorker::GetInstance() { return the_singleton.try_get(); }
-AsyncResetWorker::AsyncResetWorker(size_t n) {
+static folly::Singleton<AsyncResetWorker, PrivateTag> the_singleton;
+std::shared_ptr<AsyncResetWorker> AsyncResetWorker::GetInstance() { return the_singleton.try_get(); }
+AsyncResetWorker::AsyncResetWorker() {
   executor_ = std::make_unique<folly::CPUThreadPoolExecutor>(
-      n, std::make_shared<folly::NamedThreadFactory>("didagle_async_reset"));
+      FLAGS_didagle_async_reset_worker_num, std::make_shared<folly::NamedThreadFactory>("didagle_reset"));
 }
 
 void AsyncResetWorker::SetCustomExecutor(std::function<void(folly::Func&&)>&& func) {
@@ -52,16 +55,12 @@ void AsyncResetWorker::Post(folly::Func&& func) {
     custom_executor_(std::move(func));
     return;
   }
-  if (executor_->getTaskQueueSize() >= kErrorLogQueueSizeHint) {
-    DIDAGLE_WARN_EVERY_N(kErrorLogEveryN, "Reset worker queue size:{}", executor_->getTaskQueueSize());
-  }
   executor_->add(std::move(func));
 }
 
 AsyncResetWorker::~AsyncResetWorker() {
   if (executor_ != nullptr) {
     executor_->stop();
-    executor_->join();
     executor_.reset();
   }
 }
