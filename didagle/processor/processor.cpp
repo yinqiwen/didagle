@@ -67,6 +67,12 @@ void GraphDataContext::Reset() {
   }
 }
 GraphDataContext::GraphDataContext() {}
+void GraphDataContext::SetReleaseClosure(DoneClosure &&f) {
+  if (release_closure_) {
+    release_closure_(0);
+  }
+  release_closure_ = std::move(f);
+}
 GraphDataContext::~GraphDataContext() {
   if (release_closure_) {
     release_closure_(0);

@@ -121,8 +121,8 @@ int ProcessorDI::InjectInputs(GraphDataContext& ctx, const Params* params) {
           DIDAGLE_ERROR("[{}]inject {}:{} failed with move:{}, null data:{}", _proc->Name(), field, data.name,
                         move_data, nullptr == graph_data);
         } else {
-          DIDAGLE_DEBUG("[{}]inject {}:{} failed with move:{}, null data:{}", _proc->Name(), field, data.name,
-                        move_data, nullptr == graph_data);
+          DIDAGLE_WARN("[{}]inject {}:{} failed with move:{}, null data:{}", _proc->Name(), field, data.name, move_data,
+                       nullptr == graph_data);
         }
       }
     }

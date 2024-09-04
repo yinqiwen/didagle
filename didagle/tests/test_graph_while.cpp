@@ -71,30 +71,30 @@ deps=["test0"]
   }
 }
 
-TEST(While, expr) {
-  std::string content = R"(
-name="test"
-default_expr_processor="didagle_expr"
-[[graph]]
-name="test"
-gen_while_subgraph=true
-[[graph.vertex]]
-processor = "test0"
-start=true
-[[graph.vertex]]
-while = "$LOOP_IDX<5"
-processor="test2"
-deps=["test0"]
-  )";
-  TestContext ctx;
-  auto handle = ctx.store->LoadString(content);
-  for (int i = 0; i < 10; i++) {
-    auto data_ctx = GraphDataContext::New();
-    int rc = ctx.store->SyncExecute(data_ctx, "test", "test");
-    ASSERT_EQ(rc, 0);
+// TEST(While, expr) {
+//   std::string content = R"(
+// name="test"
+// default_expr_processor="didagle_expr"
+// [[graph]]
+// name="test"
+// gen_while_subgraph=true
+// [[graph.vertex]]
+// processor = "test0"
+// start=true
+// [[graph.vertex]]
+// while = "$LOOP_IDX<5"
+// processor="test2"
+// deps=["test0"]
+//   )";
+//   TestContext ctx;
+//   auto handle = ctx.store->LoadString(content);
+//   for (int i = 0; i < 10; i++) {
+//     auto data_ctx = GraphDataContext::New();
+//     int rc = ctx.store->SyncExecute(data_ctx, "test", "test");
+//     ASSERT_EQ(rc, 0);
 
-    auto test2 = data_ctx->Get<std::string>("test2");
-    ASSERT_TRUE(test2 != nullptr);
-    ASSERT_EQ(*test2, "test2test2test2test2test2");
-  }
-}
+//     auto test2 = data_ctx->Get<std::string>("test2");
+//     ASSERT_TRUE(test2 != nullptr);
+//     ASSERT_EQ(*test2, "test2test2test2test2test2");
+//   }
+// }

@@ -23,6 +23,7 @@
 #include "boost/preprocessor/variadic/elem.hpp"
 #include "boost/preprocessor/variadic/size.hpp"
 
+#include "didagle/log/log.h"
 #include "google/protobuf/arena.h"
 
 #include "folly/FBVector.h"
@@ -164,7 +165,7 @@ class GraphDataContext {
   const GraphDataContext *GetParent() { return _parent; }
   void ReserveChildCapacity(size_t n);
   void SetChild(const GraphDataContext *c, size_t idx);
-  void SetReleaseClosure(DoneClosure &&f) { release_closure_ = std::move(f); }
+  void SetReleaseClosure(DoneClosure &&f);
 
   uint32_t RegisterData(const DIObjectKey &id);
   int Move(const DIObjectKey &from, const DIObjectKey &to);
@@ -223,6 +224,7 @@ class GraphDataContext {
     if (nullptr != exist_entry) {
       *exist_entry = false;
     }
+
     // auto found = _data_table.find(key);
     auto found = GetDataValue(key, idx);
     if (FOLLY_LIKELY(found != nullptr)) {
@@ -246,7 +248,7 @@ class GraphDataContext {
       if (nullptr != exist_entry) {
         *exist_entry = true;
       }
-      return r;
+      // return r;
     }
     auto empty_execludes = std::make_unique<ExcludeGraphDataContextSet>();
     ExcludeGraphDataContextSet *new_excludes = excludes;

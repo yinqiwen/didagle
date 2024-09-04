@@ -60,9 +60,7 @@ bool Graph::TestCircle() {
 }
 int Graph::Build() {
   VertexTable generated_cond_nodes;
-  if (vertex.size() == 1) {
-    vertex[0].is_start = true;
-  }
+
   for (auto& n : vertex) {
     if (n.processor.empty() && !n.cond.empty()) {
       // use default expr processor
@@ -157,6 +155,10 @@ int Graph::Build() {
       // }
     }
   }
+  if (vertex.size() == 1 && vertex[0].IsDepsEmpty() && _gen_vertex.empty()) {
+    vertex[0].is_start = true;
+  }
+
   for (auto& n : vertex) {
     if (0 != n.Build()) {
       DIDAGLE_ERROR("Failed to build vertex:{} in graph:{}", n.GetDotLable(), name);

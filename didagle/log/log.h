@@ -45,6 +45,8 @@ class Spdlogger : public Logger {
 
 #define DIDAGLE_ERROR(...) DIDAGLE_LOG(spdlog::level::err, __VA_ARGS__)
 
+#define DIDAGLE_WARN(...) DIDAGLE_LOG(spdlog::level::warn, __VA_ARGS__)
+
 #define DIDAGLE_INFO(...) DIDAGLE_LOG(spdlog::level::info, __VA_ARGS__)
 
 #define DIDAGLE_DEBUG(...) DIDAGLE_LOG(spdlog::level::debug, __VA_ARGS__)

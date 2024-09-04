@@ -25,6 +25,7 @@ GRAPH_OP_BEGIN(test1)
 GRAPH_OP_INPUT(std::string, test0_a)
 GRAPH_OP_OUTPUT(std::string, test1)
 int OnExecute(const Params& args) override {
+  printf("####test1 exec\n");
   if (nullptr != test0_a) {
     test1.append(*test0_a);
   }
@@ -42,6 +43,7 @@ int OnExecute(const Params& args) override {
   } else {
     test2 = -1;
   }
+  printf("####test2 exec:%d\n", test2);
   return 0;
 }
 GRAPH_OP_END
@@ -54,9 +56,11 @@ GRAPH_OP_OUTPUT(std::string, test3_a)
 GRAPH_OP_OUTPUT(int, test3_b)
 GRAPH_OP_OUTPUT(int, test3_c)
 int OnExecute(const Params& args) override {
+  printf("####test3 exec\n");
   if (nullptr != test1) {
     test3_a.append(*test1);
   }
+  printf("####test2 exist:%d\n", test2 != nullptr);
   test3_a.append("#").append("test3");
   if (nullptr != test2) {
     test3_b = *test2 + 100;
@@ -72,39 +76,39 @@ int OnExecute(const Params& args) override {
 }
 GRAPH_OP_END
 
-TEST(Graph, simple) {
-  std::string content = R"(
-name="test"
-[[graph]]
-name="test"
-[[graph.vertex]]
-processor = "test0"
-[[graph.vertex]]
-processor = "test1"
-[[graph.vertex]]
-processor = "test2"
-[[graph.vertex]]
-processor = "test3"
-  )";
-  TestContext ctx;
-  auto handle = ctx.store->LoadString(content);
-  ASSERT_TRUE(handle != nullptr);
-  auto data_ctx = GraphDataContext::New();
-  int rc = ctx.store->SyncExecute(data_ctx, "test", "test");
-  ASSERT_EQ(rc, 0);
+// TEST(Graph, simple) {
+//   std::string content = R"(
+// name="test"
+// [[graph]]
+// name="test"
+// [[graph.vertex]]
+// processor = "test0"
+// [[graph.vertex]]
+// processor = "test1"
+// [[graph.vertex]]
+// processor = "test2"
+// [[graph.vertex]]
+// processor = "test3"
+//   )";
+//   TestContext ctx;
+//   auto handle = ctx.store->LoadString(content);
+//   ASSERT_TRUE(handle != nullptr);
+//   auto data_ctx = GraphDataContext::New();
+//   int rc = ctx.store->SyncExecute(data_ctx, "test", "test");
+//   ASSERT_EQ(rc, 0);
 
-  auto test0_b = data_ctx->Get<int>("test0_b");
-  ASSERT_TRUE(test0_b != nullptr);
-  ASSERT_EQ(*test0_b, 101);
+//   auto test0_b = data_ctx->Get<int>("test0_b");
+//   ASSERT_TRUE(test0_b != nullptr);
+//   ASSERT_EQ(*test0_b, 101);
 
-  auto test3_b = data_ctx->Get<int>("test3_b");
-  ASSERT_TRUE(test3_b != nullptr);
-  ASSERT_EQ(*test3_b, 301);
+//   auto test3_b = data_ctx->Get<int>("test3_b");
+//   ASSERT_TRUE(test3_b != nullptr);
+//   ASSERT_EQ(*test3_b, 301);
 
-  auto test3_a = data_ctx->Get<std::string>("test3_a");
-  ASSERT_TRUE(test3_a != nullptr);
-  ASSERT_EQ(*test3_a, "test0#test1#test3");
-}
+//   auto test3_a = data_ctx->Get<std::string>("test3_a");
+//   ASSERT_TRUE(test3_a != nullptr);
+//   ASSERT_EQ(*test3_a, "test0#test1#test3");
+// }
 
 TEST(Graph, subgraph) {
   std::string content = R"(

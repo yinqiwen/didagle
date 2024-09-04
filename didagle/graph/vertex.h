@@ -87,6 +87,9 @@ struct Vertex {
                           alternative, deps, deps_on_ok, deps_on_err, input, output, ignore_processor_execute_error,
                           early_exit_graph_if_failed)
   Vertex();
+  bool IsDepsEmpty() const {
+    return expect.empty() && expect_config.empty() && deps.empty() && deps_on_ok.empty() && deps_on_err.empty();
+  }
   bool IsCondVertex() const;
   void MergeSuccessor();
   bool FindVertexInSuccessors(Vertex* v) const;
