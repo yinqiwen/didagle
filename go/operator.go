@@ -4,9 +4,6 @@ import (
 	"context"
 	"errors"
 	"reflect"
-	"time"
-
-	"git.code.oa.com/trpc-go/trpc-go/metrics"
 )
 
 var ErrExistParentContext = errors.New("exist parent context")
@@ -84,20 +81,20 @@ func (op *OperatorInstance) Execute(ctx context.Context, params *Params, opts ..
 		for _, o := range opts {
 			o(&op.Opt)
 		}
-		start := time.Now()
-		defer func() {
-			timeCost := time.Since(start).Microseconds()
-			metrics.ReportMultiDimensionMetricsX(
-				"dag_operator",
-				[]*metrics.Dimension{
-					{Name: "graphName", Value: op.Opt.CurrentGraph},
-					{Name: "operatorName", Value: op.Name},
-				},
-				[]*metrics.Metrics{
-					metrics.NewMetrics("latency", float64(timeCost), metrics.PolicyHistogram),
-				},
-			)
-		}()
+		// start := time.Now()
+		// defer func() {
+		// 	timeCost := time.Since(start).Microseconds()
+		// 	metrics.ReportMultiDimensionMetricsX(
+		// 		"dag_operator",
+		// 		[]*metrics.Dimension{
+		// 			{Name: "graphName", Value: op.Opt.CurrentGraph},
+		// 			{Name: "operatorName", Value: op.Name},
+		// 		},
+		// 		[]*metrics.Metrics{
+		// 			metrics.NewMetrics("latency", float64(timeCost), metrics.PolicyHistogram),
+		// 		},
+		// 	)
+		// }()
 
 	}
 
