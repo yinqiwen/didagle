@@ -282,20 +282,27 @@ func (p *Vertex) buildInputOutput() error {
 	return nil
 }
 
-func (p *Vertex) depend(v *Vertex, expected int) {
-	idx := len(p.depsExpectResults)
+func (p *Vertex) depend(v *Vertex, expected int, implicit bool) {
 	if nil == p.depsVertexIdxMap {
 		p.depsVertexIdxMap = make(map[string]int)
 	}
-	if _, exist := p.depsVertexIdxMap[v.ID]; exist {
-		return
-	}
-
-	p.depsVertexIdxMap[v.ID] = idx
-	p.depsExpectResults = append(p.depsExpectResults, expected)
 	if nil == v.successorVertex {
 		v.successorVertex = make(map[string]*Vertex)
 	}
+	if implicit{
+		if _, exist := p.depsVertexIdxMap[v.ID]; exist {
+			return
+		}
+	}else{
+		if exist_idx, exist := p.depsVertexIdxMap[v.ID]; exist {
+			p.depsExpectResults[exist_idx] = expected
+			v.successorVertex[p.ID] = p
+			return
+		}
+	}
+	idx := len(p.depsExpectResults)
+	p.depsVertexIdxMap[v.ID] = idx
+	p.depsExpectResults = append(p.depsExpectResults, expected)
 	v.successorVertex[p.ID] = p
 }
 
@@ -305,7 +312,7 @@ func (p *Vertex) buildDeps(deps []string, expectedResult int) error {
 		if nil == dep {
 			return fmt.Errorf("[%s/%s]No dep vertex id:%s", p.g.Name, p.getDotLabel(), id)
 		}
-		p.depend(dep, expectedResult)
+		p.depend(dep, expectedResult,false)
 	}
 	return nil
 }
@@ -316,7 +323,7 @@ func (p *Vertex) buildSuccessor(sucessors []string, expectedResult int) error {
 		if nil == successor {
 			return fmt.Errorf("[%s]No successor id:%s", p.getDotLabel(), id)
 		}
-		successor.depend(p, expectedResult)
+		successor.depend(p, expectedResult,false)
 	}
 	return nil
 }
@@ -346,9 +353,9 @@ func (p *Vertex) build() error {
 				continue
 			}
 			if data.Required {
-				p.depend(dep, ResultOk)
+				p.depend(dep, ResultOk,true)
 			} else {
-				p.depend(dep, ResultAll)
+				p.depend(dep, ResultAll,true)
 			}
 		} else {
 			for _, id := range data.Aggregate {
@@ -365,9 +372,9 @@ func (p *Vertex) build() error {
 					continue
 				}
 				if data.Required {
-					p.depend(dep, ResultOk)
+					p.depend(dep, ResultOk,true)
 				} else {
-					p.depend(dep, ResultAll)
+					p.depend(dep, ResultAll,true)
 				}
 			}
 		}
