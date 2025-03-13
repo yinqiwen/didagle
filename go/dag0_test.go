@@ -173,67 +173,67 @@ func initTestDags0() {
 	}
 }
 
-// func TestSimple(t *testing.T) {
-// 	err := RegisterOperator("op0", new(testOp0))
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
-// 	err = RegisterOperator("op1", new(testOp1))
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
+func TestSimple(t *testing.T) {
+	err := RegisterOperator("op0", new(testOp0))
+	if nil != err {
+		t.Errorf("%v", err)
+	}
+	err = RegisterOperator("op1", new(testOp1))
+	if nil != err {
+		t.Errorf("%v", err)
+	}
 
-// 	cluster := NewGraphCluster("test")
-// 	cluster.StrictDsl = true
-// 	g, err := cluster.AddGraph("demo")
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
-// 	v0, err := g.AddVertex("v0")
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
-// 	v1, err := g.AddVertex("v1")
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
-// 	v0.Operator = "op0"
-// 	v1.Operator = "op1"
-// 	err = cluster.Build()
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
+	cluster := NewGraphCluster("test")
+	cluster.StrictDsl = true
+	g, err := cluster.AddGraph("demo")
+	if nil != err {
+		t.Errorf("%v", err)
+	}
+	v0, err := g.AddVertex("v0")
+	if nil != err {
+		t.Errorf("%v", err)
+	}
+	v1, err := g.AddVertex("v1")
+	if nil != err {
+		t.Errorf("%v", err)
+	}
+	v0.Operator = "op0"
+	v1.Operator = "op1"
+	err = cluster.Build()
+	if nil != err {
+		t.Errorf("%v", err)
+	}
 
-// 	ctx := NewExecuteContext(nil)
-// 	testVal := "hello,world"
-// 	SetExecuteContext[*string](ctx, "mydata2", &testVal)
-// 	SetExecuteContext[F](ctx, "testIntf", &FF{})
-// 	testMap := make(map[string]string)
-// 	testMap["hello"] = "world"
-// 	SetExecuteContext[map[string]string](ctx, "testMap", testMap)
-// 	testSlice := []string{"hello,world"}
-// 	SetExecuteContext[[]string](ctx, "testSlice", testSlice)
-// 	testMoveStr := "hello,world"
-// 	SetExecuteContext[*string](ctx, "testMove", &testMoveStr)
-// 	// ctx.Set("mydata2", &testVal) // inject external data
-// 	params := NewParams(map[string]interface{}{"param0": int(101), "param1": "aaa"})
+	ctx := NewExecuteContext(nil)
+	testVal := "hello,world"
+	SetExecuteContext[*string](ctx, "mydata2", &testVal)
+	SetExecuteContext[F](ctx, "testIntf", &FF{})
+	testMap := make(map[string]string)
+	testMap["hello"] = "world"
+	SetExecuteContext[map[string]string](ctx, "testMap", testMap)
+	testSlice := []string{"hello,world"}
+	SetExecuteContext[[]string](ctx, "testSlice", testSlice)
+	testMoveStr := "hello,world"
+	SetExecuteContext[*string](ctx, "testMove", &testMoveStr)
+	// ctx.Set("mydata2", &testVal) // inject external data
+	params := NewParams(map[string]interface{}{"param0": int(101), "param1": "aaa"})
 
-// 	err = ExecuteGraph(nil, "test", "demo", ctx, params)
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
+	err = ExecuteGraph(nil, "test", "demo", ctx, params)
+	if nil != err {
+		t.Errorf("%v", err)
+	}
 
-// 	err = ExecuteGraph(nil, "test", "demo", ctx, params)
-// 	if nil != err {
-// 		t.Errorf("%v", err)
-// 	}
-// }
+	err = ExecuteGraph(nil, "test", "demo", ctx, params)
+	if nil != err {
+		t.Errorf("%v", err)
+	}
+}
 
 func TestDAG0_0(t *testing.T) {
 	testOnce0.Do(initTestDags0)
 	// Auto Graph
 	ctx := NewExecuteContext(nil)
-	params := NewParams(map[string]interface{}{})
+	params := NewParams(map[string]interface{}{"param0": int(101), "param1": "aaa"})
 
 	err := ExecuteGraph(nil, "dag0.toml", "graph0", ctx, params)
 	if nil != err {
