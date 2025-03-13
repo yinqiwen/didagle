@@ -31,6 +31,7 @@
 #include <stdint.h>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 #include "folly/FBString.h"
@@ -150,7 +151,10 @@ inline bool isCondString(const std::string& str) {
 struct CondParams {
   std::string match;
   GraphParams args;
-  KCFG_TOML_DEFINE_FIELDS(match, args)
+
+  bool inherit_default = false;
+
+  KCFG_TOML_DEFINE_FIELDS(match, args, inherit_default)
   // 是否是条件表达式 包含有$符号算条件表达式
   bool IsCondExpr() const { return isCondString(match); }
 };

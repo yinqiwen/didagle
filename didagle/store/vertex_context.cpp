@@ -72,6 +72,9 @@ int VertexContext::Setup(GraphContext* g, Vertex* v) {
         }
       }
     }
+    if (select.inherit_default) {
+      select_ctx.param.args.SetParent(&_params);
+    }
     _select_contexts.emplace_back(select_ctx);
   }
 
